@@ -8,7 +8,7 @@ Playwright 與 App Modernization 是兩個獨立 Track，不共用案例或驗�
 | 13:35–13:55 | Playwright：自動化測試概覽 | Slides | 自動化測試的價值、適用情境與整體策略 |
 | 13:55–14:35 | Playwright：建立可靠的自動化測試 | Slides + Demo | 從核心流程測試、測試涵蓋到結果分析與問題診斷 |
 | 14:35–15:10 | Playwright Lab | Hands-on | 建立並執行自動化測試，檢視測試結果與報告 |
-| 15:10–15:30 | Playwright：Azure DevOps 與雲端規模化 Demo | Instructor Demo | 從 Azure Pipeline CI 證據切換至 Playwright Workspaces 的平行執行 |
+| 15:10–15:30 | Playwright：Azure DevOps 與 App Testing Demo | Instructor Demo | 展示 CI 品質 Gate、WIF 與 Playwright Workspace 集中報告／規模化 |
 | 15:30–15:35 | Playwright 小結 | Recap | 五項可帶回團隊的原則 |
 | 15:35–15:45 | 休息 | — | 15:45 準時開始第二 Track |
 | 15:45–16:10 | App Modernization 概覽 | Slides | Assess → Plan → Apply → Verify |

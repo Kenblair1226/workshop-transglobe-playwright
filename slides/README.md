@@ -37,6 +37,7 @@ is reconciled with this repo's actual shipped material — `docs/agenda.md`,
 
 - **Slides 1–3** — Title, workshop outcomes, and an agenda that matches
   `docs/agenda.md`'s ten timed rows exactly (13:30 open → 16:45 recap & Q&A).
+  Slide 3 is the deck's single source of timing; topic slides use phase labels.
 - **Track A · Playwright (slides 4–19)** — automation value and suitable
   scenarios; a risk-based strategy; core policy/quote journeys; coverage and
   reliability patterns; passed/failed/flaky/skipped result classification;

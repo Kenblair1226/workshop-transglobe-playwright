@@ -1175,10 +1175,9 @@ img, .image-container {
 
 <!-- ================================================================
      SLIDE 03 — AGENDA
-     SPEAKER NOTES: Times match docs/agenda.md exactly. 15:35 is the
-     hard Playwright stop; Track B restarts at 15:45 regardless of
-     lab progress. The two tracks are independent — no prerequisite
-     knowledge carries over, but the mindset does.
+     SPEAKER NOTES: This is the deck's single source of schedule timing.
+     Content slides intentionally use topic and phase labels so their guidance
+     stays accurate if the live agenda changes.
      ================================================================ -->
 <section class="slide content-slide stack bg-off">
     <div class="chrome">
@@ -1187,7 +1186,7 @@ img, .image-container {
     </div>
     <div class="slide-content">
         <p class="eyebrow reveal">13:30 – 17:00</p>
-        <h2 class="slide-title tight reveal">一個下午，兩個獨立單元</h2>
+        <h2 class="slide-title tight reveal">兩個獨立單元，各自走完可驗證流程</h2>
         <div class="agenda-columns reveal">
             <div>
                 <p class="agenda-col-label">休息前</p>
@@ -1196,7 +1195,7 @@ img, .image-container {
                     <div class="agenda-row"><span class="agenda-time">13:35</span><span class="agenda-tag a"></span><span class="agenda-text">Playwright：自動化測試概覽<span class="sub">價值、適用情境與整體策略</span></span></div>
                     <div class="agenda-row"><span class="agenda-time">13:55</span><span class="agenda-tag a"></span><span class="agenda-text">建立可靠的自動化測試<span class="sub">核心流程、涵蓋、結果分析與診斷</span></span></div>
                     <div class="agenda-row"><span class="agenda-time">14:35</span><span class="agenda-tag a"></span><span class="agenda-text">Playwright Lab<span class="sub">建立、執行測試並檢視報告</span></span></div>
-                    <div class="agenda-row"><span class="agenda-time">15:10</span><span class="agenda-tag a"></span><span class="agenda-text">Azure DevOps + 雲端 Demo<span class="sub">Pipeline 證據與 Workspaces 規模化</span></span></div>
+                    <div class="agenda-row"><span class="agenda-time">15:10</span><span class="agenda-tag a"></span><span class="agenda-text">Azure DevOps + App Testing<span class="sub">CI 品質 Gate、WIF 與 Workspace 集中報告</span></span></div>
                 </div>
             </div>
             <div>
@@ -1226,7 +1225,7 @@ img, .image-container {
     </div>
     <div class="slide-content">
         <div>
-            <p class="eyebrow reveal">13:35–13:55 · 自動化測試概覽</p>
+            <p class="eyebrow reveal">自動化測試概覽 · 核心價值</p>
             <h2 class="slide-title reveal">自動化的價值，是縮短風險回饋</h2>
             <ul class="bullet-list reveal">
                 <li><span class="bullet-mark">01</span><span>在變更進入 production 前，提早發現核心流程回歸。</span></li>
@@ -1536,7 +1535,7 @@ DOM: annual premium = $695.40
     </div>
     <div class="slide-content">
         <div>
-            <p class="eyebrow reveal">14:35–15:10 · Hands-on</p>
+            <p class="eyebrow reveal">Hands-on · Playwright Lab</p>
             <h2 class="slide-title reveal">建立一條新的保單組合篩選流程</h2>
             <ul class="bullet-list reveal">
                 <li><span class="bullet-mark">01</span><span>開啟 <code class="text-mono">tests/workshop-lab.spec.ts</code>，移除 TODO error。</span></li>
@@ -1559,9 +1558,10 @@ DOM: annual premium = $695.40
 </section>
 
 <!-- ================================================================
-    SLIDE 15 — LAB TIMELINE
-    SPEAKER NOTES: Keep this slide visible during hands-on work. At the cut
-    line, use the solution and a pre-generated report rather than overrunning.
+    SLIDE 15 — LAB WORKFLOW
+    SPEAKER NOTES: Keep this phase-oriented workflow visible during hands-on
+    work. Use the solution and pre-generated report when facilitation requires
+    a faster path without changing the learning sequence.
      ================================================================ -->
 <section class="slide content-slide stack bg-dark grid-texture">
     <div class="chrome">
@@ -1569,20 +1569,20 @@ DOM: annual premium = $695.40
         <span class="slide-index">15 / 32</span>
     </div>
     <div class="slide-content" style="position:relative; z-index:1;">
-        <p class="eyebrow reveal">Lab 節奏</p>
-        <h2 class="slide-title tight reveal">35 分鐘，保留 3 分鐘緩衝</h2>
+        <p class="eyebrow reveal">Lab workflow</p>
+        <h2 class="slide-title tight reveal">依序完成五個可驗證階段</h2>
         <div class="flow-row reveal mt-lg">
-            <div class="flow-box"><span class="fb-title">0–3</span><span class="fb-sub">baseline · 讀任務</span></div>
+            <div class="flow-box"><span class="fb-title">Baseline</span><span class="fb-sub">smoke · 讀任務</span></div>
             <div class="flow-arrow">→</div>
-            <div class="flow-box"><span class="fb-title">3–15</span><span class="fb-sub">建立新測試</span></div>
+            <div class="flow-box"><span class="fb-title">Build</span><span class="fb-sub">建立新測試</span></div>
             <div class="flow-arrow">→</div>
-            <div class="flow-box"><span class="fb-title">15–20</span><span class="fb-sub">執行 · 修正</span></div>
+            <div class="flow-box"><span class="fb-title">Run</span><span class="fb-sub">執行 · 修正</span></div>
             <div class="flow-arrow">→</div>
-            <div class="flow-box"><span class="fb-title">20–24</span><span class="fb-sub">repeat ×3</span></div>
+            <div class="flow-box"><span class="fb-title">Stability</span><span class="fb-sub">repeat ×3</span></div>
             <div class="flow-arrow">→</div>
-            <div class="flow-box"><span class="fb-title">24–32</span><span class="fb-sub">Report · Trace</span></div>
+            <div class="flow-box"><span class="fb-title">Evidence</span><span class="fb-sub">Report · Trace</span></div>
         </div>
-        <p class="small-caption reveal mt-lg">32–35 分鐘：debrief／緩衝。若進度落後，直接使用 solution 與預先產生的 failure report。</p>
+        <p class="small-caption reveal mt-lg">若需要加速，使用 solution 與預先產生的 failure report；完成每個階段的證據後再進入下一步。</p>
     </div>
     <div class="edge-accent"></div>
 </section>
@@ -1669,7 +1669,7 @@ DOM: annual premium = $695.40
     </div>
     <div class="slide-content" style="position:relative; z-index:1;">
         <div>
-            <p class="eyebrow reveal">15:10–15:20 · Pipeline integration</p>
+            <p class="eyebrow reveal">Pipeline integration · Quality gate</p>
             <h2 class="slide-title reveal">把一次本機綠燈，升級成可追蹤的品質 Gate</h2>
             <ul class="bullet-list reveal">
                 <li><span class="bullet-mark">1</span><span>Push／PR 自動在乾淨 hosted agent 執行，消除「只在我電腦通過」。</span></li>
@@ -1702,7 +1702,7 @@ DOM: annual premium = $695.40
     </div>
     <div class="slide-content">
         <div>
-            <p class="eyebrow reveal">15:20–15:30 · 集中報告與規模化</p>
+            <p class="eyebrow reveal">集中報告 · 按需規模化</p>
             <h2 class="slide-title reveal">CI 預設跑 17 tests；需要時再擴到 85</h2>
             <ul class="bullet-list reveal">
                 <li><span class="bullet-mark">01</span><span><code class="text-mono">AzureCLI@2</code> 透過 WIF 登入，執行時才解析 Workspace endpoint。</span></li>
