@@ -1658,32 +1658,32 @@ DOM: annual premium = $695.40
 </section>
 
 <!-- ================================================================
-    SLIDE 18 — AZURE DEVOPS TO WORKSPACES
-    SPEAKER NOTES: Start with Chromium on the hosted agent, then move only the
-    browsers to Azure. Explain identity, reachability, and reporting.
+    SLIDE 18 — PIPELINE QUALITY GATE
+    SPEAKER NOTES: Emphasize repeatability, traceability, faster feedback, and
+    the ability to use the pipeline as a PR or release quality gate.
      ================================================================ -->
 <section class="slide content-slide bg-dark grid-texture">
     <div class="chrome">
-        <span class="track-tag track-a"><span class="track-dot"></span>單元 A · Azure DevOps + Workspaces</span>
+        <span class="track-tag track-a"><span class="track-dot"></span>單元 A · Azure DevOps Integration</span>
         <span class="slide-index">18 / 32</span>
     </div>
     <div class="slide-content" style="position:relative; z-index:1;">
         <div>
-            <p class="eyebrow reveal">15:10–15:30 · CI 到雲端規模化</p>
-            <h2 class="slide-title reveal">同一套測試，切換兩種 browser boundary</h2>
+            <p class="eyebrow reveal">15:10–15:20 · Pipeline integration</p>
+            <h2 class="slide-title reveal">把一次本機綠燈，升級成可追蹤的品質 Gate</h2>
             <ul class="bullet-list reveal">
-                <li><span class="bullet-mark">1</span><span><code class="text-mono">npm test</code>：Chromium 與 runner 都在 Azure Pipeline agent。</span></li>
-                <li><span class="bullet-mark">2</span><span>JUnit 顯示在 Tests；HTML report 與 failure artifacts 由 pipeline 保存。</span></li>
-                <li><span class="bullet-mark">3</span><span><code class="text-mono">test:cloud</code>：runner 留在 client，browser 改由 Workspaces 管理。</span></li>
-                <li><span class="bullet-mark">4</span><span>Cloud stage 使用 Entra ID；report 可集中到 Azure Storage／Portal。</span></li>
+                <li><span class="bullet-mark">1</span><span>Push／PR 自動在乾淨 hosted agent 執行，消除「只在我電腦通過」。</span></li>
+                <li><span class="bullet-mark">2</span><span>JUnit、HTML report 與 failure artifacts 綁定 commit 與 run，可比較、可稽核。</span></li>
+                <li><span class="bullet-mark">3</span><span>失敗快速回饋，並可接 branch policy，成為 PR／release 前的品質 Gate。</span></li>
+                <li><span class="bullet-mark">4</span><span>WIF 連接 Workspace，不保存長效 secret，讓雲端測試安全地自動化。</span></li>
             </ul>
         </div>
         <div class="side-visual reveal-scale">
             <div class="visual-panel blue" style="gap: clamp(0.4rem,1.2vh,0.7rem);">
-                <p class="visual-panel-title" style="color:rgba(255,255,255,0.75);">Execution boundary</p>
-                <div class="flow-box"><span class="fb-title">Azure Pipelines</span><span class="fb-sub">test code · workers</span></div>
-                <div class="flow-box"><span class="fb-title">CI baseline</span><span class="fb-sub">hosted-agent Chromium</span></div>
-                <div class="flow-box"><span class="fb-title">Cloud scale</span><span class="fb-sub">App Testing browsers</span></div>
+                <p class="visual-panel-title" style="color:rgba(255,255,255,0.75);">Quality signal flow</p>
+                <div class="flow-box"><span class="fb-title">Push / PR</span><span class="fb-sub">path trigger · commit</span></div>
+                <div class="flow-box"><span class="fb-title">Hosted CI</span><span class="fb-sub">Chromium · JUnit</span></div>
+                <div class="flow-box"><span class="fb-title">Shared evidence</span><span class="fb-sub">Tests · artifacts · gate</span></div>
             </div>
         </div>
     </div>
@@ -1691,36 +1691,36 @@ DOM: annual premium = $695.40
 </section>
 
 <!-- ================================================================
-    SLIDE 19 — CLOUD SCALE DEMO & RECAP
-    SPEAKER NOTES: The allowlist has 17 reliable tests. Repeat five times
-    for 85 instances; 20 is a client-worker cap, not guaranteed concurrency.
+    SLIDE 19 — WORKSPACE REPORTING & SCALE
+    SPEAKER NOTES: CI uses the 17-test reliable allowlist by default. The
+    85-instance run is an explicit scale demo, not the everyday baseline.
      ================================================================ -->
 <section class="slide content-slide bg-white">
     <div class="chrome">
-        <span class="track-tag track-a"><span class="track-dot"></span>單元 A · Workspaces Demo</span>
+        <span class="track-tag track-a"><span class="track-dot"></span>單元 A · Pipeline + Workspaces</span>
         <span class="slide-index">19 / 32</span>
     </div>
     <div class="slide-content">
         <div>
-            <p class="eyebrow reveal">Cloud run + recap</p>
-            <h2 class="slide-title reveal">17 個可靠 tests × 5 = 85 instances</h2>
+            <p class="eyebrow reveal">15:20–15:30 · 集中報告與規模化</p>
+            <h2 class="slide-title reveal">CI 預設跑 17 tests；需要時再擴到 85</h2>
             <ul class="bullet-list reveal">
-                <li><span class="bullet-mark">01</span><span>Cloud allowlist 只含 smoke、core flows 與可靠 pattern solution。</span></li>
-                <li><span class="bullet-mark">02</span><span><code class="text-mono">npm run test:cloud -- --repeat-each=5 --workers=20</code></span></li>
-                <li><span class="bullet-mark">03</span><span>20 是 client worker 上限，不是保證同時有 20 個 Azure browser。</span></li>
-                <li><span class="bullet-mark">04</span><span>觀察 duration、client resource、target load 與集中報告。</span></li>
-                <li><span class="bullet-mark">05</span><span>預設 100-worker quota 是天花板，不是目標或效能承諾。</span></li>
+                <li><span class="bullet-mark">01</span><span><code class="text-mono">AzureCLI@2</code> 透過 WIF 登入，執行時才解析 Workspace endpoint。</span></li>
+                <li><span class="bullet-mark">02</span><span><code class="text-mono">npm run test:cloud</code> 將可靠 allowlist 跑在 managed browsers。</span></li>
+                <li><span class="bullet-mark">03</span><span>Portal 集中 HTML report、trace、screenshot 與 video，團隊共用同一份證據。</span></li>
+                <li><span class="bullet-mark">04</span><span>Scale demo 才使用 <code class="text-mono">repeat-each=5 · workers=20</code>，形成 85 instances。</span></li>
+                <li><span class="bullet-mark">05</span><span>20 是 client worker 上限；正式採用前仍要量測成本與 target load。</span></li>
             </ul>
-            <p class="small-caption reveal mt-lg">從 2 → 10 → 20 逐級量測；收益趨平、成本或 target load 上升時就停止加 worker。</p>
+            <p class="small-caption reveal mt-lg">日常 CI 保持小而快；只有需要驗證規模收益時，才從 2 → 10 → 20 逐級增加 workers。</p>
         </div>
         <div class="side-visual reveal-scale">
             <div class="visual-panel">
-                <p class="visual-panel-title">Demo evidence</p>
+                <p class="visual-panel-title">Pipeline evidence</p>
                 <div class="check-ring-list">
-                    <div class="check-item"><span class="check-num">17</span><span class="check-text">Reliable tests</span></div>
-                    <div class="check-item"><span class="check-num">85</span><span class="check-text">Test instances</span></div>
-                    <div class="check-item"><span class="check-num">≤20</span><span class="check-text">Client workers</span></div>
-                    <div class="check-item"><span class="check-num">✓</span><span class="check-text">Portal report</span></div>
+                    <div class="check-item"><span class="check-num">✓</span><span class="check-text">WIF · no long-lived secret</span></div>
+                    <div class="check-item"><span class="check-num">17</span><span class="check-text">Default cloud tests</span></div>
+                    <div class="check-item"><span class="check-num">85</span><span class="check-text">Scale-demo instances</span></div>
+                    <div class="check-item"><span class="check-num">✓</span><span class="check-text">Shared Portal report</span></div>
                 </div>
             </div>
         </div>

@@ -41,10 +41,12 @@ is reconciled with this repo's actual shipped material — `docs/agenda.md`,
   scenarios; a risk-based strategy; core policy/quote journeys; coverage and
   reliability patterns; passed/failed/flaky/skipped result classification;
   Report → Trace diagnostics; the real `tests/workshop-lab.spec.ts` hands-on
-  exercise and deterministic failure report; then an Azure Pipeline hosted-agent
-  baseline, the Workspaces execution boundary, and a cloud demo of 17 reliable
-  tests × 5 = 85 instances with at most 20 client workers. It assumes the
-  audience already uses Playwright and avoids a framework API tour.
+  exercise and deterministic failure report; then an Azure Pipeline quality
+  gate with commit-linked JUnit/artifacts, WIF-secured Workspace execution,
+  centralized Portal evidence, and a cost-aware scale demo that expands the
+  default 17 reliable cloud tests to 85 instances with at most 20 client
+  workers. It assumes the audience already uses Playwright and avoids a
+  framework API tour.
 - **Track B · App Modernization (slides 20–31)** — section divider,
   modernization challenges, modernization types, the Assess → Plan → Apply →
   Verify loop, artifacts, Copilot-fit vs. human-decision boundaries,
@@ -94,7 +96,8 @@ animations use `IntersectionObserver` and respect `prefers-reduced-motion`.
   slides overflow** at any size, 0 console/page errors.
 - **Content accuracy**: agenda times cross-checked against `docs/agenda.md`
   (all 10 rows match); Lab acceptance criteria checked against the starter and
-  executable solution; Azure Pipeline behavior checked against
+  executable solution; Azure Pipeline trigger, JUnit/artifact publishing,
+  `AzureCLI@2` WIF flow, and Workspace report upload checked against
   `azure-pipelines.yml`; Workspaces claims checked against Microsoft Learn and
   the reliable-spec allowlist in `playwright.service.config.ts`; Java demo content cross-checked against
   `docs/app-modernization-demo.md` and
