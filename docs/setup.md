@@ -39,6 +39,10 @@ npm run install:browsers
 
 - Workshop package 已放入 Azure Repos 或 GitHub repository。
 - 可在 Azure DevOps project 建立及執行 pipeline。
+- Azure Resource Manager service connection `sc-playwright-workspace-wif`
+  使用 workload identity federation。
+- Pipeline variable `PLAYWRIGHT_WORKSPACE_RESOURCE_ID` 指向目標 Playwright
+  Workspace resource ID。
 
 建立 pipeline 時選擇 **Existing Azure Pipelines YAML file**，路徑使用
 `/azure-pipelines.yml`。第一次執行後確認：
@@ -46,10 +50,14 @@ npm run install:browsers
 1. `Type-check Playwright tests` 與 `Run Playwright tests` 都通過。
 2. Run summary 的 **Tests** 頁籤有 Playwright JUnit 結果。
 3. Artifacts 中可下載 `playwright-report`。
+4. `Run tests and upload report to Playwright Workspace` 通過，且 Azure Portal
+   中可開啟 cloud report。
 
-此階段的 Chromium 直接執行在 Microsoft-hosted agent，不需要 Azure subscription、
-service connection 或 Playwright Workspace。若 repository 使用 Azure Repos，PR
-validation 請在目標 branch 的 Build validation policy 綁定此 pipeline。
+第一個 baseline task 的 Chromium 直接執行在 Microsoft-hosted agent；第二個 task
+才使用 WIF service connection 與 Playwright Workspace。Pipeline identity 至少需要
+subscription `Reader`、Workspace scope 的 `Playwright Workspace Contributor`，以及
+linked storage account 的 `Storage Blob Data Contributor`。若 repository 使用 Azure
+Repos，PR validation 請在目標 branch 的 Build validation policy 綁定此 pipeline。
 
 ## App Modernization Demo
 
@@ -83,10 +91,10 @@ npm run test:cloud -- --repeat-each=5 --workers=20
 不要將 workspace URL、token、tenant 或 subscription 資訊寫入 repository。
 Cloud config 只允許 17 個可靠 tests；`--repeat-each=5` 形成 85 個 test instances，讓最多 20 個 client workers 有足夠工作量。刻意脆弱案例、Lab starter／solution 與 diagnostics 均不進入 cloud run。
 
-若要從 Azure Pipeline 啟動 cloud run，請使用具 workload identity federation 的
-Azure Resource Manager service connection，在 `AzureCLI@2` task 內執行
-`npm run test:cloud`，並以 secret pipeline variable 提供
-`PLAYWRIGHT_SERVICE_URL`。一般 CI baseline 不需要這組 Azure 權限。
+`azure-pipelines.yml` 已使用具 workload identity federation 的 Azure Resource
+Manager service connection，在 `AzureCLI@2` task 內解析 Workspace endpoint 並執行
+`npm run test:cloud`。Endpoint 與 access token 都不會寫入 repository；一般 CI
+baseline 仍不使用這組 Azure 權限。
 
 ## 簡報
 

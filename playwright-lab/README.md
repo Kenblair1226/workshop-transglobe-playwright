@@ -65,9 +65,14 @@ runs `npm test` with `CI=true`.
 
 The CI configuration adds a JUnit reporter so Azure DevOps can show results in
 the **Tests** tab. The pipeline also publishes `playwright-report/` on every
-test run and `test-results/` when tests fail. This hosted-agent run needs no
-Azure subscription or service connection; those are required only when the
-later Playwright Workspaces demo moves the browsers to Azure.
+test run and `test-results/` when tests fail.
+
+After that baseline, an `AzureCLI@2` task uses the
+`sc-playwright-workspace-wif` service connection to run the reliable allowlist
+with cloud browsers. The task resolves the browser endpoint from the
+`PLAYWRIGHT_WORKSPACE_RESOURCE_ID` pipeline variable, and the Azure reporter
+uploads `playwright-cloud-report/` for viewing in the Azure portal. No access
+token or workspace endpoint is stored in the repository.
 
 ## Scripts
 

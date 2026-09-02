@@ -1,5 +1,6 @@
 node_modules/
 playwright-report/
+playwright-cloud-report/
 test-results/
 blob-report/
 .env

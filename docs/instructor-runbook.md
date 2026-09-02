@@ -54,12 +54,13 @@ xdg-open ../slides/workshop.html
 
 ### 15:10–15:30｜Azure DevOps → Playwright Workspaces
 
-1. 開啟預先完成的 Azure Pipeline run，說明 `azure-pipelines.yml` 如何在
+1. 開啟預先完成的 Azure Pipeline run，說明 `azure-pipelines.yml` 如何先在
    Microsoft-hosted agent 執行相同的 `npm test`。
 2. 展示 run summary 的 Tests 頁籤、JUnit 結果與 `playwright-report` artifact；
    強調此 baseline 尚未使用 Azure cloud browser。
-3. 對照 hosted-agent Chromium 與 Playwright Workspace 的 execution boundary。
-4. 啟動 cloud run：
+3. 展示 `Run tests and upload report to Playwright Workspace` task 如何透過 WIF
+   service connection 切換至 managed browsers，並自動上傳 cloud report。
+4. 需要現場重跑時，可使用相同 cloud command：
 
    ```bash
    npm run test:cloud -- --repeat-each=5 --workers=20

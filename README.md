@@ -39,7 +39,9 @@ npm test
 
 將 repository 放入 Azure Repos 或 GitHub 後，在 Azure DevOps 建立 pipeline，並選擇根目錄的
 `azure-pipelines.yml`。Pipeline 會在 Microsoft-hosted Ubuntu agent 上執行同一套
-Playwright tests，並將 JUnit 結果顯示在 **Tests** 頁籤，同時保留 HTML report 與失敗附件。
+Playwright tests，將 JUnit 結果顯示在 **Tests** 頁籤並保留 HTML report。接著
+`AzureCLI@2` 會使用 WIF service connection 將可靠測試跑在 Playwright Workspace；
+Azure reporter 會自動上傳 cloud report，供 Azure Portal 集中查看。
 
 ### App Modernization Demo
 

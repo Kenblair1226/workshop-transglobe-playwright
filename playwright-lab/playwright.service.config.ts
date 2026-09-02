@@ -36,7 +36,7 @@ export default defineConfig(
       '**/solutions/solution.spec.ts',
     ],
     reporter: [
-      ['html', { open: 'never', outputFolder: 'playwright-report' }], // HTML reporter must come first
+      ['html', { open: 'never', outputFolder: 'playwright-cloud-report' }], // HTML reporter must come first
       ['@azure/playwright/reporter'], // uploads the HTML report to the workspace, when reporting is enabled
     ],
   },

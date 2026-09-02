@@ -15,6 +15,7 @@ pool:
 
 variables:
   playwrightWorkingDirectory: $(Build.SourcesDirectory)/playwright-lab
+  playwrightServiceConnection: sc-playwright-workspace-wif
 
 steps:
   - checkout: self
@@ -41,6 +42,27 @@ steps:
     workingDirectory: $(playwrightWorkingDirectory)
     env:
       CI: "true"
+
+  - task: AzureCLI@2
+    displayName: Run tests and upload report to Playwright Workspace
+    inputs:
+      azureSubscription: $(playwrightServiceConnection)
+      scriptType: bash
+      scriptLocation: inlineScript
+      workingDirectory: $(playwrightWorkingDirectory)
+      inlineScript: |
+        set -euo pipefail
+        workspaceUri="$(az resource show \
+          --ids "$PLAYWRIGHT_WORKSPACE_RESOURCE_ID" \
+          --query properties.dataplaneUri \
+          --output tsv \
+          --only-show-errors)"
+        test -n "$workspaceUri"
+        export PLAYWRIGHT_SERVICE_URL="${workspaceUri/https:/wss:}/browsers"
+        npm run test:cloud
+    env:
+      CI: "true"
+      PLAYWRIGHT_WORKSPACE_RESOURCE_ID: $(PLAYWRIGHT_WORKSPACE_RESOURCE_ID)
 
   - task: PublishTestResults@2
     displayName: Publish Playwright test results
