@@ -1,0 +1,2240 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Playwright 自動化測試與應用程式現代化工作坊 — 13:30–17:00</title>
+<meta name="description" content="雙軌實作工作坊：以保險平台為情境，涵蓋 Playwright 自動化策略、可靠測試、Azure DevOps CI、Azure 雲端規模化與 Java/Spring Boot 現代化。">
+
+<!-- Fonts: Noto Sans TC (Chinese display/body) + Manrope (Latin fallback) + JetBrains Mono (code windows only) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800&amp;family=Manrope:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap">
+
+<style>
+/* =====================================================================
+   0. RESET
+   ===================================================================== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+::selection { background: #4361ee; color: #ffffff; }
+
+/* =====================================================================
+   1. THEME — ELECTRIC STUDIO
+   Palette is intentionally limited to: near-black, white, electric blue.
+   Track differentiation ("visible track color/state") is expressed as
+   STATE variation of the same blue (filled vs. hollow, solid vs. dashed)
+   rather than introducing a new hue — keeps the deck strictly on-brand.
+   ===================================================================== */
+:root {
+    /* Core palette */
+    --bg-dark: #0a0a0a;
+    --bg-dark-2: #121212;
+    --bg-white: #ffffff;
+    --bg-off: #f4f5f8;
+    --accent-blue: #4361ee;
+    --accent-blue-deep: #2b3fc4;
+    --accent-blue-tint: rgba(67, 97, 238, 0.12);
+    --accent-blue-tint-2: rgba(67, 97, 238, 0.22);
+    --text-dark: #0a0a0a;
+    --text-light: #ffffff;
+    --text-dark-muted: rgba(10, 10, 10, 0.62);
+    --text-light-muted: rgba(255, 255, 255, 0.68);
+    --line-soft: rgba(10, 10, 10, 0.12);
+    --line-soft-dark: rgba(255, 255, 255, 0.16);
+    --success: #18a957;
+    --danger: #e5484d;
+
+    /* Fonts */
+    --font-display: 'Noto Sans TC', 'Manrope', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    /* Motion */
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration-normal: 0.6s;
+
+    /* Component-level clamp()'d sizes (typography/spacing — see viewport-base.css for the core set) */
+    --eyebrow-size: clamp(0.6rem, 1vw, 0.82rem);
+    --stat-num-size: clamp(1.6rem, 4.2vw, 3.4rem);
+    --code-size: clamp(0.58rem, 1.1vw, 0.92rem);
+    --card-pad: clamp(0.7rem, 1.8vw, 1.4rem);
+    --chrome-pad-x: clamp(1rem, 4vw, 3rem);
+    --chrome-pad-y: clamp(0.6rem, 2vh, 1.4rem);
+}
+
+html, body {
+    background: var(--bg-white);
+    color: var(--text-dark);
+    font-family: var(--font-display);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* =====================================================================
+   2. VIEWPORT FITTING: MANDATORY BASE STYLES (viewport-base.css, verbatim)
+   Included in full per skill requirement — do not trim.
+   ===================================================================== */
+
+/* 1. Lock html/body to viewport */
+html, body {
+    height: 100%;
+    overflow-x: hidden;
+}
+
+html {
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+}
+
+/* 2. Each slide = exact viewport height */
+.slide {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile browsers */
+    overflow: hidden; /* CRITICAL: Prevent ANY overflow */
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* 3. Content container with flex for centering */
+.slide-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-height: 100%;
+    overflow: hidden; /* Double-protection against overflow */
+    padding: var(--slide-padding);
+}
+
+/* 4. ALL typography uses clamp() for responsive scaling */
+:root {
+    /* Titles scale from mobile to desktop */
+    --title-size: clamp(1.5rem, 5vw, 4rem);
+    --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
+    --h3-size: clamp(1rem, 2.5vw, 1.75rem);
+
+    /* Body text */
+    --body-size: clamp(0.75rem, 1.5vw, 1.125rem);
+    --small-size: clamp(0.65rem, 1vw, 0.875rem);
+
+    /* Spacing scales with viewport */
+    --slide-padding: clamp(1rem, 4vw, 4rem);
+    --content-gap: clamp(0.5rem, 2vw, 2rem);
+    --element-gap: clamp(0.25rem, 1vw, 1rem);
+}
+
+/* 5. Cards/containers use viewport-relative max sizes */
+.card, .container, .content-box {
+    max-width: min(90vw, 1000px);
+    max-height: min(80vh, 700px);
+}
+
+/* 6. Lists auto-scale with viewport */
+.feature-list, .bullet-list {
+    gap: clamp(0.4rem, 1vh, 1rem);
+}
+
+.feature-list li, .bullet-list li {
+    font-size: var(--body-size);
+    line-height: 1.4;
+}
+
+/* 7. Grids adapt to available space */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+    gap: clamp(0.5rem, 1.5vw, 1rem);
+}
+
+/* 8. Images constrained to viewport */
+img, .image-container {
+    max-width: 100%;
+    max-height: min(50vh, 400px);
+    object-fit: contain;
+}
+
+/* ===========================================
+   RESPONSIVE BREAKPOINTS
+   Aggressive scaling for smaller viewports
+   =========================================== */
+
+/* Short viewports (< 700px height) */
+@media (max-height: 700px) {
+    :root {
+        --slide-padding: clamp(0.75rem, 3vw, 2rem);
+        --content-gap: clamp(0.4rem, 1.5vw, 1rem);
+        --title-size: clamp(1.25rem, 4.5vw, 2.5rem);
+        --h2-size: clamp(1rem, 3vw, 1.75rem);
+    }
+}
+
+/* Very short viewports (< 600px height) */
+@media (max-height: 600px) {
+    :root {
+        --slide-padding: clamp(0.5rem, 2.5vw, 1.5rem);
+        --content-gap: clamp(0.3rem, 1vw, 0.75rem);
+        --title-size: clamp(1.1rem, 4vw, 2rem);
+        --body-size: clamp(0.7rem, 1.2vw, 0.95rem);
+    }
+
+    /* Hide non-essential elements */
+    .nav-dots, .keyboard-hint, .decorative {
+        display: none;
+    }
+}
+
+/* Extremely short (landscape phones, < 500px height) */
+@media (max-height: 500px) {
+    :root {
+        --slide-padding: clamp(0.4rem, 2vw, 1rem);
+        --title-size: clamp(1rem, 3.5vw, 1.5rem);
+        --h2-size: clamp(0.9rem, 2.5vw, 1.25rem);
+        --body-size: clamp(0.65rem, 1vw, 0.85rem);
+    }
+}
+
+/* Narrow viewports (< 600px width) */
+@media (max-width: 600px) {
+    :root {
+        --title-size: clamp(1.25rem, 7vw, 2.5rem);
+    }
+
+    /* Stack grids vertically */
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===========================================
+   REDUCED MOTION
+   Respect user preferences
+   =========================================== */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.2s !important;
+    }
+
+    html {
+        scroll-behavior: auto;
+    }
+}
+
+/* =====================================================================
+   3. GLOBAL CHROME — progress bar, nav dots, per-slide header/footer
+   ===================================================================== */
+.progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 0%;
+    height: clamp(3px, 0.5vh, 5px);
+    background: var(--accent-blue);
+    z-index: 9000;
+    transition: width 0.15s linear;
+}
+
+.nav-dots {
+    position: fixed;
+    right: clamp(0.6rem, 1.6vw, 1.6rem);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(4px, 0.7vh, 8px);
+    z-index: 9000;
+    max-height: 82vh;
+    overflow: hidden;
+}
+.nav-dots button {
+    width: clamp(5px, 0.8vh, 8px);
+    height: clamp(5px, 0.8vh, 8px);
+    border-radius: 50%;
+    border: 1px solid rgba(128,128,128,0.5);
+    background: rgba(128,128,128,0.35);
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.25s var(--ease-out-expo);
+    flex-shrink: 0;
+}
+.nav-dots button.active {
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+    width: clamp(7px, 1.1vh, 11px);
+    height: clamp(7px, 1.1vh, 11px);
+    box-shadow: 0 0 0 3px var(--accent-blue-tint);
+}
+
+/* Per-slide chrome: section label (left) + slide index (right).
+   mix-blend-mode:difference keeps contrast on both light & dark panels
+   without needing per-slide color overrides. */
+.chrome {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--chrome-pad-y) var(--chrome-pad-x);
+    z-index: 50;
+    pointer-events: none;
+    color: #ffffff;
+    mix-blend-mode: difference;
+}
+/* Exception: when chrome sits directly over the solid electric-blue
+   divider band, difference-blend produces a muddy olive tone — force
+   plain white instead for a clean, high-contrast label. */
+.chrome.on-blue {
+    mix-blend-mode: normal;
+    color: rgba(255, 255, 255, 0.95);
+}
+.track-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: clamp(0.3rem, 0.8vw, 0.55rem);
+    font-size: var(--eyebrow-size);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+.track-dot {
+    width: clamp(6px, 0.9vh, 9px);
+    height: clamp(6px, 0.9vh, 9px);
+    border-radius: 50%;
+    background: currentColor;
+    display: inline-block;
+}
+/* Track A = filled dot (solid state). Track B = hollow ring (outline state). */
+.track-b .track-dot {
+    background: transparent;
+    border: 1.6px solid currentColor;
+}
+.slide-index {
+    font-size: var(--eyebrow-size);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Bottom edge accent: solid bar = Track A, dashed/segmented bar = Track B */
+.edge-accent {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: clamp(3px, 0.45vh, 6px);
+    background: var(--accent-blue);
+    z-index: 40;
+}
+.edge-accent.track-b {
+    background: repeating-linear-gradient(
+        90deg,
+        var(--accent-blue) 0, var(--accent-blue) 18px,
+        transparent 18px, transparent 30px
+    );
+}
+.edge-accent.neutral {
+    background: linear-gradient(90deg, var(--accent-blue) 0%, var(--accent-blue) 50%, var(--bg-dark) 50%, var(--bg-dark) 100%);
+}
+
+.keyboard-hint {
+    position: fixed;
+    bottom: clamp(0.6rem, 1.6vh, 1.2rem);
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: var(--small-size);
+    color: rgba(120,120,120,0.55);
+    letter-spacing: 0.04em;
+    z-index: 9000;
+    pointer-events: none;
+    font-weight: 500;
+}
+
+/* =====================================================================
+   4. REVEAL ANIMATIONS — triggered by IntersectionObserver adding .visible
+   ===================================================================== */
+.reveal {
+    opacity: 0;
+    transform: translateY(clamp(14px, 2.4vh, 30px));
+    transition: opacity var(--duration-normal) var(--ease-out-expo),
+                transform var(--duration-normal) var(--ease-out-expo);
+}
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
+.reveal:nth-child(1) { transition-delay: 0.05s; }
+.reveal:nth-child(2) { transition-delay: 0.14s; }
+.reveal:nth-child(3) { transition-delay: 0.23s; }
+.reveal:nth-child(4) { transition-delay: 0.32s; }
+.reveal:nth-child(5) { transition-delay: 0.41s; }
+.reveal:nth-child(6) { transition-delay: 0.50s; }
+
+.reveal-scale {
+    opacity: 0;
+    transform: scale(0.92);
+    transition: opacity var(--duration-normal) var(--ease-out-expo), transform var(--duration-normal) var(--ease-out-expo);
+}
+.slide.visible .reveal-scale { opacity: 1; transform: scale(1); }
+
+/* Staggered children inside a card grid / stepper, independent of .reveal counter above */
+.stagger > * {
+    opacity: 0;
+    transform: translateY(clamp(10px, 1.8vh, 22px));
+    transition: opacity 0.55s var(--ease-out-expo), transform 0.55s var(--ease-out-expo);
+}
+.slide.visible .stagger > *:nth-child(1) { transition-delay: 0.08s; }
+.slide.visible .stagger > *:nth-child(2) { transition-delay: 0.16s; }
+.slide.visible .stagger > *:nth-child(3) { transition-delay: 0.24s; }
+.slide.visible .stagger > *:nth-child(4) { transition-delay: 0.32s; }
+.slide.visible .stagger > *:nth-child(5) { transition-delay: 0.40s; }
+.slide.visible .stagger > *:nth-child(6) { transition-delay: 0.48s; }
+.slide.visible .stagger > * { opacity: 1; transform: translateY(0); }
+
+/* =====================================================================
+   5. BACKGROUND TEXTURES & ABSTRACT MOTIFS (CSS-only, no illustrations)
+   ===================================================================== */
+.bg-dark { background: var(--bg-dark); color: var(--text-light); }
+.bg-white { background: var(--bg-white); color: var(--text-dark); }
+.bg-off { background: var(--bg-off); color: var(--text-dark); }
+.bg-blue { background: var(--accent-blue); color: var(--text-light); }
+
+/* Subtle structural grid, for depth on dark panels */
+.grid-texture::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+    background-size: clamp(28px, 4vw, 56px) clamp(28px, 4vw, 56px);
+    pointer-events: none;
+    z-index: 0;
+}
+.grid-texture.on-light::before {
+    background-image:
+        linear-gradient(rgba(10,10,10,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(10,10,10,0.05) 1px, transparent 1px);
+}
+
+/* Abstract "shield" motif — insurance coverage, drawn with clip-path only.
+   NOTE: `border` does not follow a clip-path outline (it draws on the
+   original box edges, which don't align with the polygon), so the ring
+   is faked with two stacked filled clip-path layers: an outer tinted
+   fill plus an inset cutout in the panel's own background color. */
+.shield-shape {
+    position: absolute;
+    width: clamp(120px, 22vw, 320px);
+    aspect-ratio: 0.86;
+    clip-path: polygon(50% 0%, 100% 18%, 100% 55%, 50% 100%, 0% 55%, 0% 18%);
+    background: rgba(67, 97, 238, 0.22);
+    z-index: 0;
+}
+.shield-shape::before {
+    content: "";
+    position: absolute;
+    inset: clamp(3px, 0.45vw, 6px);
+    clip-path: polygon(50% 0%, 100% 18%, 100% 55%, 50% 100%, 0% 55%, 0% 18%);
+    background: var(--bg-white);
+}
+.shield-shape::after {
+    content: "";
+    position: absolute;
+    inset: clamp(14px, 2.2vw, 28px);
+    clip-path: polygon(50% 0%, 100% 18%, 100% 55%, 50% 100%, 0% 55%, 0% 18%);
+    background: rgba(67, 97, 238, 0.12);
+}
+
+/* Abstract developer bracket motif, faint watermark.
+   overflow:hidden + fixed height clip the font's glyph-ink bleed so it
+   never contributes to the containing slide's scrollHeight. */
+.bracket-motif {
+    position: absolute;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: clamp(4rem, 16vw, 13rem);
+    height: clamp(4rem, 16vw, 13rem);
+    color: rgba(67, 97, 238, 0.08);
+    line-height: 1;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* Concentric ring motif — used behind stat/checklist visuals */
+.ring-motif {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(67, 97, 238, 0.25);
+    z-index: 0;
+}
+
+/* =====================================================================
+   6. TITLE / DIVIDER SLIDE — signature Electric Studio split panel
+   ===================================================================== */
+.split-hero {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.split-hero .panel-top {
+    flex: 0 0 64%;
+    background: var(--bg-white);
+    color: var(--text-dark);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--slide-padding);
+    position: relative;
+    overflow: hidden;
+}
+.split-hero .panel-bottom {
+    flex: 0 0 36%;
+    background: var(--accent-blue);
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--content-gap);
+    padding: 0 var(--slide-padding);
+    position: relative;
+    overflow: hidden;
+    flex-wrap: wrap;
+}
+.hero-eyebrow {
+    font-size: var(--eyebrow-size);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent-blue);
+    margin-bottom: clamp(0.5rem, 1.4vh, 1rem);
+}
+.hero-title {
+    font-size: clamp(2rem, 6.4vw, 5.2rem);
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    max-width: min(92%, 900px);
+}
+.hero-title em {
+    font-style: normal;
+    color: var(--accent-blue);
+}
+.hero-sub {
+    margin-top: clamp(0.6rem, 1.6vh, 1.2rem);
+    font-size: var(--h3-size);
+    font-weight: 500;
+    color: var(--text-dark-muted);
+    max-width: min(85%, 720px);
+}
+.hero-meta-row {
+    display: flex;
+    gap: clamp(0.8rem, 3vw, 2.2rem);
+    flex-wrap: wrap;
+    align-items: center;
+}
+.hero-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(1px, 0.3vh, 4px);
+}
+.hero-meta-item .label {
+    font-size: var(--small-size);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-light-muted);
+    font-weight: 700;
+}
+.hero-meta-item .value {
+    font-size: var(--h3-size);
+    font-weight: 700;
+}
+
+/* Divider slide (Track B) — inverted composition: thin blue band top, deep dark body */
+.divider-slide {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-dark);
+    color: var(--text-light);
+    position: relative;
+    overflow: hidden;
+}
+.divider-band {
+    flex: 0 0 clamp(60px, 12vh, 130px);
+    background: var(--accent-blue);
+    display: flex;
+    align-items: center;
+    padding: 0 var(--slide-padding);
+    font-size: var(--h3-size);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+}
+.divider-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--slide-padding);
+    position: relative;
+    z-index: 1;
+}
+.divider-num {
+    font-family: var(--font-mono);
+    font-size: clamp(3rem, 10vw, 7rem);
+    font-weight: 700;
+    color: rgba(67, 97, 238, 0.4);
+    line-height: 1;
+    margin-bottom: clamp(0.4rem, 1.4vh, 1rem);
+}
+.divider-title {
+    font-size: clamp(2rem, 6vw, 4.6rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.04;
+}
+.divider-sub {
+    margin-top: clamp(0.6rem, 1.6vh, 1.2rem);
+    font-size: var(--h3-size);
+    color: var(--text-light-muted);
+    font-weight: 500;
+    max-width: min(80%, 720px);
+}
+
+/* =====================================================================
+   7. CONTENT SLIDE — heading + bullets + side visual
+   ===================================================================== */
+.content-slide .slide-content {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: clamp(1rem, 3vw, 3rem);
+    align-items: center;
+}
+.content-slide.stack .slide-content { grid-template-columns: minmax(0, 1fr); }
+.content-slide .slide-content > * { min-width: 0; }
+.eyebrow {
+    font-size: var(--eyebrow-size);
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent-blue);
+    margin-bottom: clamp(0.4rem, 1.2vh, 0.8rem);
+}
+.slide-title {
+    font-size: var(--h2-size);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.08;
+    max-width: 18ch;
+}
+.slide-title.tight { max-width: none; }
+.bullet-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    margin-top: clamp(0.8rem, 2vh, 1.4rem);
+    max-height: min(55vh, 460px);
+}
+.bullet-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: clamp(0.5rem, 1.2vw, 0.9rem);
+    padding: clamp(0.35rem, 1vh, 0.6rem) 0;
+    border-bottom: 1px solid var(--line-soft);
+}
+.bg-dark .bullet-list li { border-bottom-color: var(--line-soft-dark); }
+.bullet-list li:last-child { border-bottom: none; }
+.bullet-mark {
+    flex-shrink: 0;
+    width: clamp(18px, 2vw, 24px);
+    height: clamp(18px, 2vw, 24px);
+    border-radius: 6px;
+    background: var(--accent-blue-tint);
+    color: var(--accent-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: clamp(0.6rem, 1vw, 0.78rem);
+    font-weight: 700;
+    margin-top: 2px;
+}
+.bullet-list strong { font-weight: 700; }
+.side-visual {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-height: min(60vh, 480px);
+}
+/* Dark (or blue) rounded panel used to host diagrams inside a content-slide's side-visual */
+.visual-panel {
+    background: var(--bg-dark);
+    color: var(--text-light);
+    border-radius: 18px;
+    padding: clamp(1rem, 2.6vw, 1.8rem);
+    width: 100%;
+    max-width: min(92%, 480px);
+    max-height: min(58vh, 460px);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: clamp(0.6rem, 1.6vh, 1rem);
+}
+.visual-panel.blue { background: var(--accent-blue); }
+.visual-panel-title {
+    font-size: clamp(0.6rem, 1vw, 0.78rem);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+    color: var(--text-light-muted);
+    margin-bottom: clamp(0.2rem, 0.6vh, 0.4rem);
+}
+
+/* =====================================================================
+   8. CARD GRID COMPONENT — up to 6 cards
+   ===================================================================== */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(0.6rem, 1.4vw, 1.1rem);
+    margin-top: clamp(0.8rem, 2vh, 1.4rem);
+    max-height: min(58vh, 470px);
+}
+.card-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.info-card {
+    background: var(--bg-white);
+    border: 1px solid var(--line-soft);
+    border-radius: 12px;
+    padding: var(--card-pad);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.3rem, 0.8vh, 0.5rem);
+    position: relative;
+    overflow: hidden;
+}
+.bg-dark .info-card, .bg-off .info-card.on-dark {
+    background: rgba(255,255,255,0.04);
+    border-color: var(--line-soft-dark);
+}
+.info-card .card-index {
+    font-family: var(--font-mono);
+    font-size: var(--small-size);
+    color: var(--accent-blue);
+    font-weight: 700;
+}
+.info-card .card-title {
+    font-size: clamp(0.82rem, 1.5vw, 1.05rem);
+    font-weight: 700;
+    line-height: 1.25;
+}
+.info-card .card-body {
+    font-size: clamp(0.68rem, 1.05vw, 0.85rem);
+    color: var(--text-dark-muted);
+    line-height: 1.35;
+}
+.bg-dark .info-card .card-body { color: var(--text-light-muted); }
+.info-card.flag-good { border-left: 3px solid var(--success); }
+.info-card.flag-bad { border-left: 3px solid var(--danger); }
+.info-card.flag-watch { border-left: 3px solid var(--accent-blue); }
+
+/* =====================================================================
+   9. COMPARE / TWO-COLUMN COMPONENT (bad vs good, Copilot vs human)
+   ===================================================================== */
+.compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(0.7rem, 1.6vw, 1.4rem);
+    margin-top: clamp(0.8rem, 2vh, 1.2rem);
+    max-height: min(58vh, 470px);
+}
+.compare-col {
+    border-radius: 14px;
+    padding: var(--card-pad);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.4rem, 1vh, 0.7rem);
+    overflow: hidden;
+}
+.compare-col.bad { background: rgba(229,72,77,0.07); border: 1px solid rgba(229,72,77,0.25); }
+.compare-col.good { background: rgba(24,169,87,0.07); border: 1px solid rgba(24,169,87,0.25); }
+.compare-col.neutral-dark { background: var(--bg-dark); color: var(--text-light); border: 1px solid var(--line-soft-dark); }
+.compare-col.neutral-blue { background: var(--accent-blue-tint); border: 1px solid var(--accent-blue-tint-2); }
+.compare-head {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.35rem, 1vw, 0.6rem);
+    font-weight: 800;
+    font-size: clamp(0.78rem, 1.3vw, 1rem);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.compare-col.bad .compare-head { color: var(--danger); }
+.compare-col.good .compare-head { color: var(--success); }
+.compare-col ul { list-style: none; display: flex; flex-direction: column; gap: clamp(0.25rem, 0.8vh, 0.5rem); }
+.compare-col li {
+    font-size: clamp(0.68rem, 1.05vw, 0.86rem);
+    line-height: 1.35;
+    padding-left: clamp(0.8rem, 1.6vw, 1.2rem);
+    position: relative;
+}
+.compare-col.bad li::before { content: "✕"; position: absolute; left: 0; color: var(--danger); font-weight: 700; }
+.compare-col.good li::before { content: "✓"; position: absolute; left: 0; color: var(--success); font-weight: 700; }
+.compare-col.neutral-dark li::before, .compare-col.neutral-blue li::before { content: "—"; position: absolute; left: 0; color: var(--accent-blue); }
+
+/* =====================================================================
+   10. CODE WINDOW COMPONENT — max 8-10 lines, JetBrains Mono
+   ===================================================================== */
+.code-window {
+    background: var(--bg-dark);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
+    max-width: min(100%, 640px);
+    max-height: min(42vh, 340px);
+    box-shadow: 0 clamp(6px,1.4vh,20px) clamp(16px,3vh,40px) rgba(0,0,0,0.25);
+}
+.code-window .code-titlebar {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.3rem, 0.7vw, 0.5rem);
+    padding: clamp(0.4rem, 1.1vh, 0.65rem) clamp(0.6rem, 1.4vw, 0.9rem);
+    background: #1a1a1a;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.code-titlebar .dot { width: clamp(6px,0.9vh,9px); height: clamp(6px,0.9vh,9px); border-radius: 50%; }
+.dot.red { background: #ff5f57; } .dot.yellow { background: #febc2e; } .dot.green { background: #28c840; }
+.code-titlebar .filename {
+    margin-left: clamp(0.4rem, 1vw, 0.8rem);
+    font-family: var(--font-mono);
+    font-size: var(--small-size);
+    color: rgba(255,255,255,0.5);
+}
+.code-window pre {
+    margin: 0;
+    padding: clamp(0.7rem, 1.6vh, 1.1rem) clamp(0.8rem, 1.8vw, 1.2rem);
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-size: var(--code-size);
+    line-height: 1.55;
+    color: #e6e8f0;
+}
+.code-window code .cm { color: #6b7280; }
+.code-window code .kw { color: #4361ee; }
+.code-window code .st { color: #7ee787; }
+.code-window code .fn { color: #ffb454; }
+.code-window code .bad-line { background: rgba(229,72,77,0.16); display: inline-block; width: 100%; }
+.code-window code .good-line { background: rgba(24,169,87,0.14); display: inline-block; width: 100%; }
+
+/* =====================================================================
+   11. DIAGRAM COMPONENTS — pyramid, stepper, arch flow, loop, bars
+   ===================================================================== */
+
+/* --- Testing pyramid --- */
+.pyramid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(3px, 0.6vh, 6px);
+    width: 100%;
+}
+.pyramid-tier {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-light);
+    font-weight: 700;
+    font-size: clamp(0.62rem, 1.1vw, 0.9rem);
+    border-radius: 6px;
+    padding: clamp(0.4rem, 1.2vh, 0.7rem) clamp(0.5rem, 1.4vw, 1rem);
+    flex-direction: column;
+    gap: 2px;
+}
+.pyramid-tier .t-sub { font-weight: 500; font-size: clamp(0.55rem, 0.9vw, 0.72rem); opacity: 0.85; }
+.pyramid-tier.t1 { width: 46%; background: var(--accent-blue-deep); }
+.pyramid-tier.t2 { width: 66%; background: var(--accent-blue); }
+.pyramid-tier.t3 { width: 90%; background: #8fa4f2; color: var(--text-dark); }
+
+/* --- Stepper / horizontal timeline --- */
+.stepper {
+    display: flex;
+    width: 100%;
+    position: relative;
+    gap: clamp(0.3rem, 1vw, 0.6rem);
+}
+.stepper::before {
+    content: "";
+    position: absolute;
+    top: clamp(11px, 1.6vh, 16px);
+    left: clamp(18px, 3vw, 26px);
+    right: clamp(18px, 3vw, 26px);
+    height: 2px;
+    background: var(--line-soft);
+    z-index: 0;
+}
+.bg-dark .stepper::before { background: var(--line-soft-dark); }
+.step {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: clamp(0.3rem, 0.9vh, 0.5rem);
+    position: relative;
+    z-index: 1;
+}
+.step-dot {
+    width: clamp(22px, 3.2vh, 32px);
+    height: clamp(22px, 3.2vh, 32px);
+    border-radius: 50%;
+    background: var(--accent-blue);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: clamp(0.65rem, 1.1vw, 0.85rem);
+}
+.step-label { font-weight: 700; font-size: clamp(0.62rem, 1.05vw, 0.85rem); overflow-wrap: anywhere; }
+.step-time { font-size: var(--small-size); color: var(--text-dark-muted); font-family: var(--font-mono); overflow-wrap: anywhere; }
+.bg-dark .step-time { color: var(--text-light-muted); }
+
+/* --- Architecture / flow diagram --- */
+.flow-row {
+    display: flex;
+    align-items: stretch;
+    gap: clamp(0.4rem, 1.2vw, 0.8rem);
+    width: 100%;
+    min-width: 0;
+}
+.flow-box {
+    flex: 1;
+    min-width: 0;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--line-soft-dark);
+    border-radius: 10px;
+    padding: clamp(0.5rem, 1.3vh, 0.85rem);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    justify-content: center;
+}
+.bg-white .flow-box, .bg-off .flow-box {
+    background: var(--bg-white);
+    border: 1px solid var(--line-soft);
+}
+.flow-box .fb-title { font-weight: 700; font-size: clamp(0.66rem, 1.15vw, 0.88rem); overflow-wrap: anywhere; }
+.flow-box .fb-sub { font-size: clamp(0.58rem, 0.95vw, 0.72rem); color: var(--text-light-muted); font-family: var(--font-mono); overflow-wrap: anywhere; }
+.bg-white .flow-box .fb-sub, .bg-off .flow-box .fb-sub { color: var(--text-dark-muted); }
+.flow-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-blue);
+    font-size: clamp(0.9rem, 1.8vw, 1.4rem);
+    font-weight: 700;
+}
+.flow-loop {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.4rem, 1vw, 0.7rem);
+    margin-top: clamp(0.6rem, 1.6vh, 1rem);
+    font-family: var(--font-mono);
+    font-size: clamp(0.62rem, 1.05vw, 0.82rem);
+    color: var(--accent-blue);
+}
+.loop-arc {
+    width: clamp(16px, 2.4vh, 22px);
+    height: clamp(16px, 2.4vh, 22px);
+    border-radius: 50%;
+    border: 2.5px solid var(--accent-blue);
+    border-top-color: transparent;
+    border-right-color: transparent;
+}
+
+/* --- Parallel worker bars --- */
+.worker-lanes { display: flex; flex-direction: column; gap: clamp(0.35rem, 1vh, 0.6rem); width: 100%; }
+.lane { display: flex; align-items: center; gap: clamp(0.4rem, 1vw, 0.7rem); }
+.lane-label { font-family: var(--font-mono); font-size: var(--small-size); width: 4.5em; flex-shrink: 0; color: var(--text-light-muted); }
+.lane-track { flex: 1; height: clamp(8px, 1.6vh, 14px); background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }
+.lane-fill { height: 100%; background: var(--accent-blue); border-radius: 4px; }
+
+.bar-compare { display: flex; flex-direction: column; gap: clamp(0.5rem, 1.4vh, 0.9rem); width: 100%; }
+.bar-row { display: flex; align-items: center; gap: clamp(0.5rem, 1.2vw, 0.9rem); }
+.bar-row .bar-label { width: 6.5em; font-size: clamp(0.62rem, 1vw, 0.82rem); font-weight: 700; flex-shrink: 0; }
+.bar-row .bar-shape { height: clamp(20px, 3.4vh, 34px); background: var(--accent-blue); border-radius: 6px; display: flex; align-items: center; padding: 0 0.6em; color: #fff; font-family: var(--font-mono); font-size: var(--small-size); font-weight: 700; }
+.bar-row.serial .bar-shape { background: rgba(67,97,238,0.35); }
+
+/* --- Report / PR mockups --- */
+.mock-card {
+    background: var(--bg-white);
+    border: 1px solid var(--line-soft);
+    border-radius: 14px;
+    padding: var(--card-pad);
+    width: 100%;
+    max-width: min(100%, 560px);
+}
+.mock-card .mock-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: clamp(0.5rem, 1.4vh, 0.9rem); }
+.mock-card .mock-title { font-weight: 800; font-size: clamp(0.8rem, 1.3vw, 1rem); }
+.mock-pill { font-family: var(--font-mono); font-size: var(--small-size); font-weight: 700; padding: 2px clamp(0.4rem, 1vw, 0.7rem); border-radius: 20px; }
+.mock-pill.pass { background: rgba(24,169,87,0.12); color: var(--success); }
+.mock-pill.fail { background: rgba(229,72,77,0.12); color: var(--danger); }
+.mock-row { display: flex; justify-content: space-between; align-items: center; padding: clamp(0.3rem, 0.9vh, 0.55rem) 0; border-bottom: 1px solid var(--line-soft); font-size: clamp(0.62rem, 1vw, 0.82rem); }
+.mock-row:last-child { border-bottom: none; }
+.mock-row .check { color: var(--success); font-weight: 700; }
+.mock-stat-row { display: flex; gap: clamp(0.8rem, 2vw, 1.6rem); margin-top: clamp(0.4rem, 1.2vh, 0.8rem); }
+.mock-stat { display: flex; flex-direction: column; }
+.mock-stat .n { font-family: var(--font-mono); font-weight: 700; font-size: clamp(1rem, 2vw, 1.5rem); }
+.mock-stat .n.green { color: var(--success); }
+.mock-stat .n.blue { color: var(--accent-blue); }
+.mock-stat .l { font-size: var(--small-size); color: var(--text-dark-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* --- Folder tree mockup --- */
+.tree { font-family: var(--font-mono); font-size: clamp(0.6rem, 1.05vw, 0.85rem); display: flex; flex-direction: column; gap: clamp(2px, 0.5vh, 5px); }
+.tree .t-item { color: var(--text-light-muted); }
+.tree .t-item.hl { color: #fff; font-weight: 700; }
+.tree .t-item .tag { color: var(--accent-blue); margin-left: 0.6em; font-weight: 700; }
+
+/* --- Stat cards (value slide) --- */
+.stat-row { display: flex; gap: clamp(0.6rem, 1.8vw, 1.3rem); width: 100%; }
+.stat-card { flex: 1; text-align: center; padding: var(--card-pad); border-radius: 12px; background: var(--accent-blue-tint); }
+.stat-card .stat-num { font-size: var(--stat-num-size); font-weight: 800; color: var(--accent-blue); font-family: var(--font-mono); line-height: 1; }
+.stat-card .stat-label { font-size: var(--small-size); font-weight: 600; margin-top: clamp(0.2rem, 0.8vh, 0.5rem); color: var(--text-dark-muted); }
+
+/* --- Browser engine motif (three overlapping circles) --- */
+.engine-dots { display: flex; justify-content: center; }
+.engine-dots span {
+    width: clamp(34px, 6vw, 58px);
+    height: clamp(34px, 6vw, 58px);
+    border-radius: 50%;
+    border: 2px solid var(--accent-blue);
+    margin-left: clamp(-14px, -2.4vw, -22px);
+    background: rgba(67,97,238,0.06);
+}
+.engine-dots span:first-child { margin-left: 0; }
+
+/* --- Checklist ring (outcomes slide) --- */
+.check-ring-list { display: flex; flex-direction: column; gap: clamp(0.5rem, 1.4vh, 0.9rem); position: relative; }
+.check-ring-list::before {
+    content: "";
+    position: absolute;
+    left: clamp(13px, 1.9vh, 18px);
+    top: clamp(13px, 1.9vh, 18px);
+    bottom: clamp(13px, 1.9vh, 18px);
+    width: 2px;
+    background: var(--line-soft-dark);
+}
+.check-item { display: flex; align-items: center; gap: clamp(0.6rem, 1.4vw, 1rem); position: relative; z-index: 1; }
+.check-num {
+    width: clamp(26px, 3.8vh, 36px);
+    height: clamp(26px, 3.8vh, 36px);
+    border-radius: 50%;
+    background: var(--bg-dark);
+    border: 2px solid var(--accent-blue);
+    color: var(--accent-blue);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-weight: 700; font-size: clamp(0.65rem, 1vw, 0.85rem);
+    flex-shrink: 0;
+}
+.check-text { font-size: clamp(0.68rem, 1.15vw, 0.92rem); font-weight: 500; }
+
+/* =====================================================================
+   12. AGENDA TIMELINE
+   ===================================================================== */
+.agenda-list { display: flex; flex-direction: column; width: 100%; max-height: min(60vh, 480px); }
+.agenda-row {
+    display: grid;
+    grid-template-columns: clamp(90px,14vw,150px) auto 1fr;
+    align-items: center;
+    gap: clamp(0.5rem, 1.6vw, 1.2rem);
+    padding: clamp(0.5rem, 1.5vh, 0.85rem) 0;
+    border-bottom: 1px solid var(--line-soft);
+}
+.agenda-row:last-child { border-bottom: none; }
+.agenda-time { font-family: var(--font-mono); font-weight: 700; font-size: clamp(0.68rem, 1.15vw, 0.9rem); color: var(--accent-blue); }
+.agenda-tag { width: clamp(8px,1.2vh,12px); height: clamp(8px,1.2vh,12px); border-radius: 3px; }
+.agenda-tag.a { background: var(--accent-blue); }
+.agenda-tag.b { background: transparent; border: 2px solid var(--accent-blue); }
+.agenda-tag.n { background: var(--text-dark); }
+.agenda-text { font-size: clamp(0.72rem, 1.25vw, 0.98rem); font-weight: 600; }
+.agenda-text .sub { display: block; font-weight: 400; color: var(--text-dark-muted); font-size: clamp(0.6rem, 1vw, 0.78rem); margin-top: 2px; }
+/* Two-column variant used on the agenda slide: 10 rows split 5+5 so
+   each column reuses the same vertical budget a single 5-row list
+   already fits within (verified during viewport QA). */
+.agenda-columns { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1rem, 3vw, 2.6rem); width: 100%; margin-top: clamp(0.6rem, 1.8vh, 1.1rem); }
+.agenda-columns .agenda-list { max-height: none; }
+.agenda-col-label { font-family: var(--font-mono); font-size: clamp(0.58rem, 0.95vw, 0.72rem); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-blue); margin-bottom: clamp(0.3rem, 1vh, 0.5rem); }
+.agenda-list.compact .agenda-row { grid-template-columns: clamp(52px,6.5vw,72px) auto 1fr; gap: clamp(0.4rem, 1vw, 0.7rem); padding: clamp(0.32rem, 1.05vh, 0.55rem) 0; }
+.agenda-list.compact .agenda-time { font-size: clamp(0.58rem, 0.95vw, 0.76rem); }
+.agenda-list.compact .agenda-text { font-size: clamp(0.6rem, 1vw, 0.78rem); }
+.agenda-list.compact .agenda-text .sub { font-size: clamp(0.5rem, 0.82vw, 0.64rem); }
+
+/* =====================================================================
+   13. CLOSING SLIDE
+   ===================================================================== */
+.closing-tracks { display: flex; gap: clamp(0.6rem, 2vw, 1.4rem); flex-wrap: wrap; }
+.closing-pill {
+    display: flex; align-items: center; gap: clamp(0.35rem,1vw,0.6rem);
+    padding: clamp(0.35rem,1vh,0.6rem) clamp(0.7rem,1.8vw,1.2rem);
+    border-radius: 30px; font-weight: 700; font-size: clamp(0.66rem,1.1vw,0.85rem);
+    text-transform: uppercase; letter-spacing: 0.06em;
+}
+.closing-pill.a { background: #fff; color: var(--accent-blue); }
+.closing-pill.b { background: transparent; border: 2px solid rgba(255,255,255,0.85); color: #fff; }
+
+/* =====================================================================
+   14. UTILITY
+   ===================================================================== */
+.mt-lg { margin-top: clamp(0.8rem, 2vh, 1.4rem); }
+.text-mono { font-family: var(--font-mono); }
+.small-caption { font-size: var(--small-size); color: var(--text-dark-muted); }
+.bg-dark .small-caption { color: var(--text-light-muted); }
+</style>
+</head>
+<body>
+
+<!-- Scroll progress indicator, filled by JS as user moves through the deck -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Navigation dots, one per slide, generated by JS; click to jump -->
+<nav class="nav-dots" id="navDots" aria-label="投影片導覽"></nav>
+
+<!-- Keyboard hint -->
+<div class="keyboard-hint decorative">↑ ↓ / 空白鍵 / 滑動切換</div>
+
+<main id="slidesRoot">
+<!-- ================================================================
+     SLIDE 01 — TITLE
+     SPEAKER NOTES: Welcome the room. Confirm laptops/dev env are ready
+     before 13:30. Set expectations: hands-on, two independent tracks,
+     testing discipline in the morning feeds directly into how we trust
+     AI-assisted changes in the afternoon.
+     ================================================================ -->
+<section class="slide bg-white">
+    <div class="chrome">
+        <span class="track-tag track-neutral"><span class="track-dot"></span>工作坊</span>
+        <span class="slide-index">01 / 32</span>
+    </div>
+    <div class="split-hero">
+        <div class="panel-top">
+            <div class="shield-shape" style="top: clamp(0.8rem,4vh,2.4rem); right: clamp(1rem,4vw,3rem);" aria-hidden="true"></div>
+            <p class="hero-eyebrow reveal">13:30 – 17:00 · 進階實作工作坊</p>
+            <h1 class="hero-title reveal">從測試策略，<br>走向<em>CI 與雲端規模化</em>。</h1>
+            <p class="hero-sub reveal">以保險核心流程串起 Playwright 自動化策略、可靠測試、Azure Pipelines 與 Playwright Workspaces。</p>
+        </div>
+        <div class="panel-bottom">
+            <div class="hero-meta-row reveal">
+                <div class="hero-meta-item"><span class="label">單元 A</span><span class="value">Playwright 自動化</span></div>
+                <div class="hero-meta-item"><span class="label">單元 B</span><span class="value">應用程式現代化</span></div>
+                <div class="hero-meta-item"><span class="label">領域</span><span class="value">保險平台</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="edge-accent neutral"></div>
+</section>
+
+<!-- ================================================================
+     SLIDE 02 — OUTCOMES
+     SPEAKER NOTES: Frame these as promises, not aspirations — refer
+     back to this slide at 17:00 during final recap/Q&A.
+     ================================================================ -->
+<section class="slide content-slide bg-white">
+    <div class="chrome">
+        <span class="track-tag track-neutral"><span class="track-dot"></span>工作坊</span>
+        <span class="slide-index">02 / 32</span>
+    </div>
+    <div class="slide-content">
+        <div>
+            <p class="eyebrow reveal">今天 17:00 前</p>
+            <h2 class="slide-title reveal">帶走五項可落地成果</h2>
+            <ul class="bullet-list reveal">
+                <li><span class="bullet-mark">01</span><span>用商業風險判斷哪些情境值得自動化，以及該放在哪個測試層。</span></li>
+                <li><span class="bullet-mark">02</span><span>從核心流程與風險面設計涵蓋，而不是追求案例數量。</span></li>
+                <li><span class="bullet-mark">03</span><span>分類 pass、fail、flaky、skipped，並從 Report／Trace 找出 root cause。</span></li>
+                <li><span class="bullet-mark">04</span><span>親手建立、執行一條新流程，留下 repeat 與報告證據。</span></li>
+                <li><span class="bullet-mark">05</span><span>理解 Workspaces 雲端平行執行，以及 Java 現代化的驗證迴圈。</span></li>
+            </ul>
+        </div>
+        <div class="side-visual reveal-scale">
+            <div class="visual-panel">
+                <p class="visual-panel-title">今天的成果清單</p>
+                <div class="check-ring-list">
+                    <div class="check-item"><span class="check-num">1</span><span class="check-text">自動化選擇策略</span></div>
+                    <div class="check-item"><span class="check-num">2</span><span class="check-text">核心流程與涵蓋</span></div>
+                    <div class="check-item"><span class="check-num">3</span><span class="check-text">結果分析與診斷</span></div>
+                    <div class="check-item"><span class="check-num">4</span><span class="check-text">Azure Pipeline 證據</span></div>
+                    <div class="check-item"><span class="check-num">5</span><span class="check-text">App Testing 規模化</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="edge-accent neutral"></div>
+</section>
+
+<!-- ================================================================
+     SLIDE 03 — AGENDA
+     SPEAKER NOTES: Times match docs/agenda.md exactly. 15:35 is the
+     hard Playwright stop; Track B restarts at 15:45 regardless of
+     lab progress. The two tracks are independent — no prerequisite
+     knowledge carries over, but the mindset does.
+     ================================================================ -->
+<section class="slide content-slide stack bg-off">
+    <div class="chrome">
+        <span class="track-tag track-neutral"><span class="track-dot"></span>工作坊</span>
+        <span class="slide-index">03 / 32</span>
+    </div>
+    <div class="slide-content">
+        <p class="eyebrow reveal">13:30 – 17:00</p>
+        <h2 class="slide-title tight reveal">一個下午，兩個獨立單元</h2>
+        <div class="agenda-columns reveal">
+            <div>
+                <p class="agenda-col-label">休息前</p>
+                <div class="agenda-list compact">
+                    <div class="agenda-row"><span class="agenda-time">13:30</span><span class="agenda-tag n"></span><span class="agenda-text">開場<span class="sub">說明：目標、流程、環境</span></span></div>
+                    <div class="agenda-row"><span class="agenda-time">13:35</span><span class="agenda-tag a"></span><span class="agenda-text">Playwright：自動化測試概覽<span class="sub">價值、適用情境與整體策略</span></span></div>
+                    <div class="agenda-row"><span class="agenda-time">13:55</span><span class="agenda-tag a"></span><span class="agenda-text">建立可靠的自動化測試<span class="sub">核心流程、涵蓋、結果分析與診斷</span></span></div>
+                    <div class="agenda-row"><span class="agenda-time">14:35</span><span class="agenda-tag a"></span><span class="agenda-text">Playwright Lab<span class="sub">建立、執行測試並檢視報告</span></span></div>
+                    <div class="agenda-row"><span class="agenda-time">15:10</span><span class="agenda-tag a"></span><span class="agenda-text">Azure DevOps + 雲端 Demo<span class="sub">Pipeline 證據與 Workspaces 規模化</span></span></div>
+                </div>
+            </div>
+            <div>
+                <p class="agenda-col-label">休息後</p>
+                <div class="agenda-list compact">
+                    <div class="agenda-row"><span class="agenda-time">15:30</span><span class="agenda-tag a"></span><span class="agenda-text">Playwright 回顧<span class="sub">五項可帶回團隊的原則</span></span></div>
+                    <div class="agenda-row"><span class="agenda-time">15:35</span><span class="agenda-tag n"></span><span class="agenda-text">休息<span class="sub">15:45 準時開始單元 B</span></span></div>
+                    <div class="agenda-row"><span class="agenda-time">15:45</span><span class="agenda-tag b"></span><span class="agenda-text">應用程式現代化概覽<span class="sub">投影片：評估 → 規劃 → 套用 → 驗證</span></span></div>
+                    <div class="agenda-row"><span class="agenda-time">16:10</span><span class="agenda-tag b"></span><span class="agenda-text">Java 應用程式現代化示範<span class="sub">現場 checkpoint 示範，含人工關卡</span></span></div>
+                    <div class="agenda-row"><span class="agenda-time">16:45</span><span class="agenda-tag n"></span><span class="agenda-text">總結與問答<span class="sub">討論：挑選 PoC 候選項目</span></span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="edge-accent neutral"></div>
+</section>
+
+<!-- ================================================================
+    SLIDE 04 — AUTOMATION VALUE
+    SPEAKER NOTES: Frame automation as faster risk feedback and reusable
+    evidence, not as a replacement for exploratory testing.
+     ================================================================ -->
+<section class="slide content-slide bg-white">
+    <div class="chrome">
+        <span class="track-tag track-a"><span class="track-dot"></span>單元 A · Playwright</span>
+        <span class="slide-index">04 / 32</span>
+    </div>
+    <div class="slide-content">
+        <div>
+            <p class="eyebrow reveal">13:35–13:55 · 自動化測試概覽</p>
+            <h2 class="slide-title reveal">自動化的價值，是縮短風險回饋</h2>
+            <ul class="bullet-list reveal">
+                <li><span class="bullet-mark">01</span><span>在變更進入 production 前，提早發現核心流程回歸。</span></li>
+                <li><span class="bullet-mark">02</span><span>把高頻人工回歸轉成可重複、可比較的品質訊號。</span></li>
+                <li><span class="bullet-mark">03</span><span>讓 PR、release 與稽核都有一致的執行證據。</span></li>
+                <li><span class="bullet-mark">04</span><span>釋放人工時間，留給探索、風險判斷與新情境設計。</span></li>
+            </ul>
+        </div>
+        <div class="side-visual reveal-scale">
+            <div style="display:flex; flex-direction:column; gap: clamp(0.8rem,2vh,1.4rem); width:100%; align-items:center;">
+                <div class="engine-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                <div class="stat-row">
+                    <div class="stat-card"><div class="stat-num">快</div><div class="stat-label">風險提早回饋</div></div>
+                    <div class="stat-card"><div class="stat-num">穩</div><div class="stat-label">結果可重複</div></div>
+                    <div class="stat-card"><div class="stat-num">證</div><div class="stat-label">品質可追溯</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="edge-accent"></div>
+</section>
+
+<!-- ================================================================
+    SLIDE 05 — SUITABLE SCENARIOS
+    SPEAKER NOTES: Ask which customer journeys are high-value, repeatable,
+    and objectively decidable; keep exploratory and volatile work manual.
+     ================================================================ -->
+<section class="slide content-slide bg-white">
+    <div class="chrome">
+        <span class="track-tag track-a"><span class="track-dot"></span>單元 A · Playwright</span>
+        <span class="slide-index">05 / 32</span>
+    </div>
+    <div class="slide-content">
+        <div>
+            <p class="eyebrow reveal">適用情境</p>
+            <h2 class="slide-title reveal">高價值、可重複、可判定，才值得自動化</h2>
+            <ul class="bullet-list reveal">
+                <li><span class="bullet-mark">✓</span><span>報價、承保、付款、理賠等 business-critical journeys。</span></li>
+                <li><span class="bullet-mark">✓</span><span>高頻回歸、跨瀏覽器或多角色組合。</span></li>
+                <li><span class="bullet-mark">✓</span><span>輸入、狀態與預期結果都能穩定控制的情境。</span></li>
+                <li><span class="bullet-mark">–</span><span>一次性探索、快速變動 prototype、主觀 UX 判斷先保留人工。</span></li>
+            </ul>
+        </div>
+        <div class="side-visual reveal-scale">
+            <div class="pyramid" role="img" aria-label="自動化優先順序：高風險流程優先、穩定可判定情境評估、一次性或高變動情境暫緩">
+                <div class="pyramid-tier t1">優先<span class="t-sub">高風險核心流程</span></div>
+                <div class="pyramid-tier t2">評估<span class="t-sub">穩定 · 可重複 · 可判定</span></div>
+                <div class="pyramid-tier t3">暫緩<span class="t-sub">一次性 · 高變動 · 主觀</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="edge-accent"></div>
+</section>
+
+<!-- ================================================================
+    SLIDE 06 — OVERALL STRATEGY
+    SPEAKER NOTES: Connect business risk to test depth and connect each
+    trigger (PR, nightly, release) to a deliberately different scope.
+     ================================================================ -->
+<section class="slide content-slide stack bg-white">
+    <div class="chrome">
+        <span class="track-tag track-a"><span class="track-dot"></span>單元 A · Playwright</span>
+        <span class="slide-index">06 / 32</span>
+    </div>
+    <div class="slide-content">
+        <p class="eyebrow reveal">整體策略</p>
+        <h2 class="slide-title tight reveal">風險決定深度，觸發點決定範圍</h2>
+        <div class="card-grid stagger">
+            <div class="info-card flag-good"><span class="card-index">01</span><span class="card-title">商業風險</span><span class="card-body">先排核心 journey，再排頁面與元件。</span></div>
+            <div class="info-card flag-good"><span class="card-index">02</span><span class="card-title">測試層級</span><span class="card-body">Unit／API 承擔細節，E2E 驗證跨系統旅程。</span></div>
+            <div class="info-card flag-good"><span class="card-index">03</span><span class="card-title">Run profile</span><span class="card-body">PR 要快、nightly 要廣、release 要可稽核。</span></div>
+            <div class="info-card flag-watch"><span class="card-index">04</span><span class="card-title">測試資料</span><span class="card-body">可建立、可識別、可清理，避免共享碰撞。</span></div>
+            <div class="info-card flag-watch"><span class="card-index">05</span><span class="card-title">結果證據</span><span class="card-body">Report、Trace、影片與截圖回答「為什麼」。</span></div>
+            <div class="info-card flag-watch"><span class="card-index">06</span><span class="card-title">改善迴圈</span><span class="card-body">用 flake、耗時與 defect yield 調整投資。</span></div>
+        </div>
+    </div>
+    <div class="edge-accent"></div>
+</section>
+
+<!-- ================================================================
+    SLIDE 07 — CORE JOURNEYS
+    SPEAKER NOTES: Start from the user's business goal and observable
+    outcome, then derive pages, controls, data, and assertions.
+     ================================================================ -->
+<section class="slide content-slide stack bg-white">
+    <div class="chrome">
+        <span class="track-tag track-a"><span class="track-dot"></span>單元 A · Playwright</span>
+        <span class="slide-index">07 / 32</span>
+    </div>
+    <div class="slide-content">
+        <p class="eyebrow reveal">13:55–14:35 · 建立可靠測試</p>
+        <h2 class="slide-title tight reveal">從核心流程開始，不從頁面清單開始</h2>
+        <div class="compare reveal">
+            <div class="compare-col neutral-blue">
+                <div class="compare-head">保單服務 Journey</div>
+                <div class="code-window">
+                    <div class="code-titlebar"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><span class="filename">policy journey</span></div>
+                    <pre><code><span class="cm">search</span> → filter → open details
+→ verify status / coverage → close</code></pre>
+                </div>
+                <ul><li>商業訊號：找到正確保單與保障內容</li></ul>
+            </div>
+            <div class="compare-col neutral-blue">
+                <div class="compare-head">報價 Journey</div>
+                <div class="code-window">
+                    <div class="code-titlebar"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><span class="filename">quote journey</span></div>
+                    <pre><code><span class="cm">input</span> → validation → calculation
+→ verify premium / discount / quote id</code></pre>
+                </div>
+                <ul><li>商業訊號：規則、金額與錯誤處理正確</li></ul>
+            </div>
+        </div>
+        <p class="small-caption reveal mt-lg">核心流程的起點是使用者目標，終點是可觀察的商業結果。</p>
+    </div>
+    <div class="edge-accent"></div>
+</section>
+
+<!-- ================================================================
+    SLIDE 08 — RELIABLE TEST SKELETON
+    SPEAKER NOTES: Walk through Arrange, Act, Assert, and observable Wait
+    signals using the same Home + Pending journey used in the lab.
+     ================================================================ -->
+<section class="slide content-slide bg-white">
+    <div class="chrome">
+        <span class="track-tag track-a"><span class="track-dot"></span>單元 A · Playwright</span>
+        <span class="slide-index">08 / 32</span>
+    </div>
+    <div class="slide-content">
+        <div>
+            <p class="eyebrow reveal">可靠測試骨架</p>
+            <h2 class="slide-title reveal">資料、動作、商業結果，都要可觀察</h2>
+            <ul class="bullet-list reveal">
+                <li><span class="bullet-mark">A</span><span>Arrange：使用確定、可識別的資料與初始狀態。</span></li>
+                <li><span class="bullet-mark">A</span><span>Act：透過使用者看得到的 control 操作流程。</span></li>
+                <li><span class="bullet-mark">A</span><span>Assert：驗證商業結果，而非 DOM 實作細節。</span></li>
+                <li><span class="bullet-mark">W</span><span>Wait：等待可觀察訊號，不猜固定秒數。</span></li>
+            </ul>
+        </div>
+        <div class="side-visual reveal-scale">
+            <div class="code-window">
+                                <div class="code-titlebar"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><span class="filename">policy-flow.spec.ts</span></div>
+                                <pre><code><span class="kw">await</span> page.goto(<span class="st">'/search.html'</span>);
+<span class="kw">await</span> product.selectOption(<span class="st">'home'</span>);
+<span class="kw">await</span> status.selectOption(<span class="st">'pending'</span>);
+<span class="kw">await</span> expect(results)
+    .toHaveText(<span class="st">'1 policy found'</span>);
+<span class="kw">await</span> expect(row).toContainText(<span class="st">'POL-100245'</span>);</code></pre>
+            </div>
+        </div>
+    </div>
+    <div class="edge-accent"></div>
+</section>
+
+<!-- ================================================================
+    SLIDE 09 — RISK-BASED COVERAGE
+    SPEAKER NOTES: Coverage is a map of business risks, not a raw test
+    count. Expand browser/OS matrices only for high-risk journeys.
+     ================================================================ -->
+<section class="slide content-slide bg-dark grid-texture">
+    <div class="chrome">
+        <span class="track-tag track-a"><span class="track-dot"></span>單元 A · Playwright</span>
+        <span class="slide-index">09 / 32</span>
+    </div>
+    <div class="slide-content" style="position:relative; z-index:1;">
+        <div>
+            <p class="eyebrow reveal">風險導向涵蓋</p>
+            <h2 class="slide-title reveal">測試涵蓋不是案例數，而是風險面</h2>
+            <ul class="bullet-list reveal">
+                <li><span class="bullet-mark">1</span><span>Happy path：核心交易能否完成，關鍵金額與狀態是否正確。</span></li>
+                <li><span class="bullet-mark">2</span><span>Negative path：驗證、權限、空結果與錯誤回應。</span></li>
+                <li><span class="bullet-mark">3</span><span>Boundary：年齡、費率、日期與 coverage 門檻。</span></li>
+                <li><span class="bullet-mark">4</span><span>Matrix：只把高風險 journey 擴到 browser／OS／role 組合。</span></li>
+            </ul>
+        </div>
+        <div class="side-visual reveal-scale">
+            <div class="visual-panel blue" style="gap: clamp(0.4rem,1.2vh,0.7rem);">
+                <p class="visual-panel-title" style="color: rgba(255,255,255,0.75);">Coverage map</p>
+                <div class="flow-box"><span class="fb-title">Core</span><span class="fb-sub">quote · bind · claim</span></div>
+                <div class="flow-box"><span class="fb-title">Error</span><span class="fb-sub">validation · auth · empty</span></div>
+                <div class="flow-box"><span class="fb-title">Boundary</span><span class="fb-sub">rules · dates · amounts</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="edge-accent"></div>
+</section>
+
+<!-- ================================================================
+    SLIDE 10 — RELIABILITY PRINCIPLES
+    SPEAKER NOTES: Contrast the intentionally brittle examples with their
+    reliable solutions; retries classify instability but do not fix it.
+     ================================================================ -->
+<section class="slide content-slide stack bg-white">
+    <div class="chrome">
+        <span class="track-tag track-a"><span class="track-dot"></span>單元 A · Playwright</span>
+        <span class="slide-index">10 / 32</span>
+    </div>
+    <div class="slide-content">
+        <p class="eyebrow reveal">可靠性原則</p>
+        <h2 class="slide-title tight reveal">先消除 flake，再談大量平行</h2>
+        <div class="card-grid stagger">
+            <div class="info-card flag-watch"><span class="card-index">01</span><span class="card-title">語意 locator</span><span class="card-body">描述使用者意圖，不綁 DOM 順序。</span></div>
+            <div class="info-card flag-watch"><span class="card-index">02</span><span class="card-title">Web-first assertion</span><span class="card-body">等待真實狀態，不使用固定 sleep。</span></div>
+            <div class="info-card flag-watch"><span class="card-index">03</span><span class="card-title">測試隔離</span><span class="card-body">不依賴順序、不共享可變狀態。</span></div>
+            <div class="info-card flag-watch"><span class="card-index">04</span><span class="card-title">確定性資料</span><span class="card-body">輸入與商業結果可預測、可清理。</span></div>
+            <div class="info-card flag-watch"><span class="card-index">05</span><span class="card-title">Retry 是訊號</span><span class="card-body">用來分類 flaky，不用來掩蓋根因。</span></div>
+        </div>
+    </div>
+    <div class="edge-accent"></div>
+</section>
+
+<!-- ================================================================
+    SLIDE 11 — RESULT CLASSIFICATION
+    SPEAKER NOTES: Clarify that Playwright marks a test flaky when it fails
+    first and passes on retry; repeat-each alone does not assign that label.
+     ================================================================ -->
+<section class="slide content-slide stack bg-off">
+    <div class="chrome">
+        <span class="track-tag track-a"><span class="track-dot"></span>單元 A · Playwright</span>
+        <span class="slide-index">11 / 32</span>
+    </div>
+    <div class="slide-content">
+        <p class="eyebrow reveal">結果分析</p>
+        <h2 class="slide-title tight reveal">先分類結果，再決定下一個動作</h2>
+        <div class="card-grid stagger">
+            <div class="info-card"><span class="card-index">PASS</span><span class="card-title">首次即通過</span><span class="card-body">符合預期，仍要關注耗時與涵蓋缺口。</span></div>
+            <div class="info-card"><span class="card-index">FAIL</span><span class="card-title">確定性失敗</span><span class="card-body">Assertion、應用、環境或資料與預期不符。</span></div>
+            <div class="info-card"><span class="card-index">FLAKY</span><span class="card-title">Retry 後通過</span><span class="card-body">Playwright 的 flaky 分類；必須追根因。</span></div>
+            <div class="info-card"><span class="card-index">SKIP</span><span class="card-title">未執行</span><span class="card-body">不是綠燈證據，必須說明條件與 owner。</span></div>
+            <div class="info-card"><span class="card-index">SLOW</span><span class="card-title">通過但太慢</span><span class="card-body">拖長 feedback loop，也提高雲端執行成本。</span></div>
+        </div>
+    </div>
+    <div class="edge-accent"></div>
+</section>
+
+<!-- ================================================================
+    SLIDE 12 — DIAGNOSTICS PATH
+    SPEAKER NOTES: Use the deterministic quote failure to move from report
+    to trace evidence, then classify application defect vs. test assumption.
+     ================================================================ -->
+<section class="slide content-slide bg-white">
+    <div class="chrome">
+        <span class="track-tag track-a"><span class="track-dot"></span>單元 A · Playwright</span>
+        <span class="slide-index">12 / 32</span>
+    </div>
+    <div class="slide-content">
+        <div>
+            <p class="eyebrow reveal">問題診斷</p>
+            <h2 class="slide-title reveal">Report → Trace → Root cause</h2>
+            <ul class="bullet-list reveal">
+                <li><span class="bullet-mark">1</span><span>Report：定位第一個失敗 assertion、project、retry 與附件。</span></li>
+                <li><span class="bullet-mark">2</span><span>Trace：沿 timeline 找最後成功動作與失敗前後頁面狀態。</span></li>
+                <li><span class="bullet-mark">3</span><span>證據：比對 DOM snapshot、network、console、影片與截圖。</span></li>
+                <li><span class="bullet-mark">4</span><span>歸因：application defect、test assumption、data 或 environment。</span></li>
+            </ul>
+        </div>
+        <div class="side-visual reveal-scale">
+                        <div class="code-window">
+                                <div class="code-titlebar"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><span class="filename">failure-demo.spec.ts</span></div>
+                                <pre><code><span class="bad-line">Expected: "$732.00"</span>
+<span class="good-line">Received: "$695.40"</span>
+
+action: Get a Quote
+network: POST /api/quote → 200
+DOM: annual premium = $695.40
+
+<span class="cm">root cause: test ignored 5% discount</span></code></pre>
+            </div>
+        </div>
+    </div>
+    <div class="edge-accent"></div>
+</section>
+
+<!-- ================================================================
+    SLIDE 13 — READINESS GATES
+    SPEAKER NOTES: Repeat checks consistency; multiple workers check
+    isolation. Keep retries at zero so readiness defects stay visible.
+     ================================================================ -->
+<section class="slide content-slide stack bg-white">
+    <div class="chrome">
+        <span class="track-tag track-a"><span class="track-dot"></span>單元 A · Playwright</span>
+        <span class="slide-index">13 / 32</span>
+    </div>
+    <div class="slide-content">
+        <p class="eyebrow reveal">Readiness gate</p>
+        <h2 class="slide-title tight reveal">穩定性與平行安全，是兩個不同 gate</h2>
+        <div class="stepper stagger mt-lg">
+            <div class="step"><span class="step-dot">1</span><span class="step-label">Local green</span><span class="step-time">先確認單次執行正確</span></div>
+            <div class="step"><span class="step-dot">2</span><span class="step-label">Repeat ×3</span><span class="step-time">retries=0 · 檢查一致性</span></div>
+            <div class="step"><span class="step-dot">3</span><span class="step-label">Workers ×2</span><span class="step-time">檢查資料與順序隔離</span></div>
+            <div class="step"><span class="step-dot">4</span><span class="step-label">Inspect</span><span class="step-time">flake · shared state · duration</span></div>
+            <div class="step"><span class="step-dot">5</span><span class="step-label">Gate</span><span class="step-time">證據通過才放大</span></div>
+        </div>
+        <p class="small-caption reveal mt-lg">Repeat 驗證一致性；parallel 驗證隔離。使用 <code class="text-mono">retries=0</code>，避免 retry 掩蓋 readiness 問題。</p>
+    </div>
+    <div class="edge-accent"></div>
+</section>
+
+<!-- ================================================================
+    SLIDE 14 — LAB MISSION
+    SPEAKER NOTES: Confirm smoke is green, then explain that the starter's
+    TODO failure is intentional and must be replaced by the new journey.
+     ================================================================ -->
+<section class="slide content-slide bg-off">
+    <div class="chrome">
+        <span class="track-tag track-a"><span class="track-dot"></span>單元 A · Playwright Lab</span>
+        <span class="slide-index">14 / 32</span>
+    </div>
+    <div class="slide-content">
+        <div>
+            <p class="eyebrow reveal">14:35–15:10 · Hands-on</p>
+            <h2 class="slide-title reveal">建立一條新的保單組合篩選流程</h2>
+            <ul class="bullet-list reveal">
+                <li><span class="bullet-mark">01</span><span>開啟 <code class="text-mono">tests/workshop-lab.spec.ts</code>，移除 TODO error。</span></li>
+                <li><span class="bullet-mark">02</span><span>組合篩選 Product = Home、Status = Pending。</span></li>
+                <li><span class="bullet-mark">03</span><span>確認唯一結果為 <code class="text-mono">POL-100245</code>。</span></li>
+                <li><span class="bullet-mark">04</span><span>開啟明細，驗證保障額、日期，再關閉 modal。</span></li>
+            </ul>
+        </div>
+        <div class="side-visual reveal-scale">
+            <div class="mock-card">
+                <div class="mock-head"><span class="mock-title">workshop-lab.spec.ts</span><span class="mock-pill fail">TODO</span></div>
+                <div class="mock-row"><span>Filter</span><span class="check">Home + Pending</span></div>
+                <div class="mock-row"><span>Result</span><span class="check">POL-100245</span></div>
+                <div class="mock-row"><span>Coverage</span><span class="check">$310000.00</span></div>
+                <div class="mock-row"><span>Effective</span><span class="check">2025-09-01</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="edge-accent"></div>
+</section>
+
+<!-- ================================================================
+    SLIDE 15 — LAB TIMELINE
+    SPEAKER NOTES: Keep this slide visible during hands-on work. At the cut
+    line, use the solution and a pre-generated report rather than overrunning.
+     ================================================================ -->
+<section class="slide content-slide stack bg-dark grid-texture">
+    <div class="chrome">
+        <span class="track-tag track-a"><span class="track-dot"></span>單元 A · Playwright Lab</span>
+        <span class="slide-index">15 / 32</span>
+    </div>
+    <div class="slide-content" style="position:relative; z-index:1;">
+        <p class="eyebrow reveal">Lab 節奏</p>
+        <h2 class="slide-title tight reveal">35 分鐘，保留 3 分鐘緩衝</h2>
+        <div class="flow-row reveal mt-lg">
+            <div class="flow-box"><span class="fb-title">0–3</span><span class="fb-sub">baseline · 讀任務</span></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box"><span class="fb-title">3–15</span><span class="fb-sub">建立新測試</span></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box"><span class="fb-title">15–20</span><span class="fb-sub">執行 · 修正</span></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box"><span class="fb-title">20–24</span><span class="fb-sub">repeat ×3</span></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box"><span class="fb-title">24–32</span><span class="fb-sub">Report · Trace</span></div>
+        </div>
+        <p class="small-caption reveal mt-lg">32–35 分鐘：debrief／緩衝。若進度落後，直接使用 solution 與預先產生的 failure report。</p>
+    </div>
+    <div class="edge-accent"></div>
+</section>
+
+<!-- ================================================================
+    SLIDE 16 — LAB EVIDENCE
+    SPEAKER NOTES: A green run, a no-retry repeat run, and a reviewed report
+    are separate pieces of evidence; require all three.
+     ================================================================ -->
+<section class="slide content-slide bg-white">
+    <div class="chrome">
+        <span class="track-tag track-a"><span class="track-dot"></span>單元 A · Playwright Lab</span>
+        <span class="slide-index">16 / 32</span>
+    </div>
+    <div class="slide-content">
+        <div>
+            <p class="eyebrow reveal">執行與完成證據</p>
+            <h2 class="slide-title reveal">綠燈只是第一份證據</h2>
+            <ul class="bullet-list reveal">
+                <li><span class="bullet-mark">1</span><span><code class="text-mono">npm run test:smoke</code>：先確認環境基線。</span></li>
+                <li><span class="bullet-mark">2</span><span><code class="text-mono">npm run test:lab</code>：starter 先紅，完成後轉綠。</span></li>
+                <li><span class="bullet-mark">3</span><span><code class="text-mono">npm run test:lab:repeat</code>：2 workers、3/3 通過。</span></li>
+                <li><span class="bullet-mark">4</span><span><code class="text-mono">npm run test:report</code>：檢視後按 Ctrl+C 關閉。</span></li>
+            </ul>
+        </div>
+        <div class="side-visual reveal-scale">
+            <div class="visual-panel">
+                <p class="visual-panel-title">完成檢核</p>
+                <div class="check-ring-list">
+                    <div class="check-item"><span class="check-num">✓</span><span class="check-text">新 journey 已建立</span></div>
+                    <div class="check-item"><span class="check-num">✓</span><span class="check-text">單次 1/1 通過</span></div>
+                    <div class="check-item"><span class="check-num">✓</span><span class="check-text">重複 3/3 通過</span></div>
+                    <div class="check-item"><span class="check-num">✓</span><span class="check-text">已檢視 HTML Report</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="edge-accent"></div>
+</section>
+
+<!-- ================================================================
+    SLIDE 17 — FAILURE REPORT EXERCISE
+    SPEAKER NOTES: Exit code 1 is expected. Stop the prior report server
+    before running this command so learners inspect the intended artifact.
+     ================================================================ -->
+<section class="slide content-slide bg-off">
+    <div class="chrome">
+        <span class="track-tag track-a"><span class="track-dot"></span>單元 A · Playwright Lab</span>
+        <span class="slide-index">17 / 32</span>
+    </div>
+    <div class="slide-content">
+        <div>
+            <p class="eyebrow reveal">Failure report exercise</p>
+            <h2 class="slide-title reveal">從預期失敗中讀出 root cause</h2>
+            <ul class="bullet-list reveal">
+                <li><span class="bullet-mark">1</span><span><code class="text-mono">npm run test:failure-demo</code>：exit 1 是預期結果。</span></li>
+                <li><span class="bullet-mark">2</span><span><code class="text-mono">npm run test:report</code>：找最後成功動作與差異。</span></li>
+                <li><span class="bullet-mark">3</span><span>Trace 中比對 DOM、network、console 與 screenshot。</span></li>
+                <li><span class="bullet-mark">4</span><span>判定是 application defect，還是 test assumption 錯誤。</span></li>
+            </ul>
+        </div>
+        <div class="side-visual reveal-scale">
+            <div class="mock-card">
+                <div class="mock-head"><span class="mock-title">quote annual premium</span><span class="mock-pill fail">EXPECTED FAIL</span></div>
+                <div class="mock-row"><span>Expected</span><span class="text-mono">$732.00</span></div>
+                <div class="mock-row"><span>Received</span><span class="text-mono">$695.40</span></div>
+                <div class="mock-row"><span>API</span><span class="check">POST /api/quote · 200</span></div>
+                <div class="mock-row"><span>Root cause</span><span class="check">test 忽略 5% 年繳折扣</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="edge-accent"></div>
+</section>
+
+<!-- ================================================================
+    SLIDE 18 — AZURE DEVOPS TO WORKSPACES
+    SPEAKER NOTES: Start with Chromium on the hosted agent, then move only the
+    browsers to Azure. Explain identity, reachability, and reporting.
+     ================================================================ -->
+<section class="slide content-slide bg-dark grid-texture">
+    <div class="chrome">
+        <span class="track-tag track-a"><span class="track-dot"></span>單元 A · Azure DevOps + Workspaces</span>
+        <span class="slide-index">18 / 32</span>
+    </div>
+    <div class="slide-content" style="position:relative; z-index:1;">
+        <div>
+            <p class="eyebrow reveal">15:10–15:30 · CI 到雲端規模化</p>
+            <h2 class="slide-title reveal">同一套測試，切換兩種 browser boundary</h2>
+            <ul class="bullet-list reveal">
+                <li><span class="bullet-mark">1</span><span><code class="text-mono">npm test</code>：Chromium 與 runner 都在 Azure Pipeline agent。</span></li>
+                <li><span class="bullet-mark">2</span><span>JUnit 顯示在 Tests；HTML report 與 failure artifacts 由 pipeline 保存。</span></li>
+                <li><span class="bullet-mark">3</span><span><code class="text-mono">test:cloud</code>：runner 留在 client，browser 改由 Workspaces 管理。</span></li>
+                <li><span class="bullet-mark">4</span><span>Cloud stage 使用 Entra ID；report 可集中到 Azure Storage／Portal。</span></li>
+            </ul>
+        </div>
+        <div class="side-visual reveal-scale">
+            <div class="visual-panel blue" style="gap: clamp(0.4rem,1.2vh,0.7rem);">
+                <p class="visual-panel-title" style="color:rgba(255,255,255,0.75);">Execution boundary</p>
+                <div class="flow-box"><span class="fb-title">Azure Pipelines</span><span class="fb-sub">test code · workers</span></div>
+                <div class="flow-box"><span class="fb-title">CI baseline</span><span class="fb-sub">hosted-agent Chromium</span></div>
+                <div class="flow-box"><span class="fb-title">Cloud scale</span><span class="fb-sub">App Testing browsers</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="edge-accent"></div>
+</section>
+
+<!-- ================================================================
+    SLIDE 19 — CLOUD SCALE DEMO & RECAP
+    SPEAKER NOTES: The allowlist has 17 reliable tests. Repeat five times
+    for 85 instances; 20 is a client-worker cap, not guaranteed concurrency.
+     ================================================================ -->
+<section class="slide content-slide bg-white">
+    <div class="chrome">
+        <span class="track-tag track-a"><span class="track-dot"></span>單元 A · Workspaces Demo</span>
+        <span class="slide-index">19 / 32</span>
+    </div>
+    <div class="slide-content">
+        <div>
+            <p class="eyebrow reveal">Cloud run + recap</p>
+            <h2 class="slide-title reveal">17 個可靠 tests × 5 = 85 instances</h2>
+            <ul class="bullet-list reveal">
+                <li><span class="bullet-mark">01</span><span>Cloud allowlist 只含 smoke、core flows 與可靠 pattern solution。</span></li>
+                <li><span class="bullet-mark">02</span><span><code class="text-mono">npm run test:cloud -- --repeat-each=5 --workers=20</code></span></li>
+                <li><span class="bullet-mark">03</span><span>20 是 client worker 上限，不是保證同時有 20 個 Azure browser。</span></li>
+                <li><span class="bullet-mark">04</span><span>觀察 duration、client resource、target load 與集中報告。</span></li>
+                <li><span class="bullet-mark">05</span><span>預設 100-worker quota 是天花板，不是目標或效能承諾。</span></li>
+            </ul>
+            <p class="small-caption reveal mt-lg">從 2 → 10 → 20 逐級量測；收益趨平、成本或 target load 上升時就停止加 worker。</p>
+        </div>
+        <div class="side-visual reveal-scale">
+            <div class="visual-panel">
+                <p class="visual-panel-title">Demo evidence</p>
+                <div class="check-ring-list">
+                    <div class="check-item"><span class="check-num">17</span><span class="check-text">Reliable tests</span></div>
+                    <div class="check-item"><span class="check-num">85</span><span class="check-text">Test instances</span></div>
+                    <div class="check-item"><span class="check-num">≤20</span><span class="check-text">Client workers</span></div>
+                    <div class="check-item"><span class="check-num">✓</span><span class="check-text">Portal report</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="edge-accent"></div>
+</section>
+
+<!-- ================================================================
+     SLIDE 20 — TRACK B SECTION DIVIDER
+     SPEAKER NOTES: Reset energy after the break. Name the demo
+     service (PolicyService) so it's not a surprise later.
+     ================================================================ -->
+<section class="slide divider-slide grid-texture">
+    <div class="chrome on-blue">
+        <span class="track-tag track-b"><span class="track-dot"></span>單元 B · 應用程式現代化</span>
+        <span class="slide-index">20 / 32</span>
+    </div>
+    <div class="bracket-motif" style="bottom: clamp(0.4rem,1.6vh,2rem); right: clamp(0.5rem,2vw,2rem);" aria-hidden="true">{ }</div>
+    <div class="divider-band">單元 B</div>
+    <div class="divider-body">
+        <p class="divider-num reveal">02</p>
+        <h2 class="divider-title reveal">應用程式現代化</h2>
+        <p class="divider-sub reveal">以保險保單平台為情境，在人工防護措施下運用 AI 輔助 Java 與 Spring Boot 升級。</p>
+    </div>
+    <div class="edge-accent track-b"></div>
+</section>
+
+<!-- ================================================================
+     SLIDE 21 — MODERNIZATION CHALLENGES
+     SPEAKER NOTES: Poll the room — ask which of these six is closest
+     to their own team's reality.
+     ================================================================ -->
+<section class="slide content-slide stack bg-white">
+    <div class="chrome">
+        <span class="track-tag track-b"><span class="track-dot"></span>單元 B · 應用程式現代化</span>
+        <span class="slide-index">21 / 32</span>
+    </div>
+    <div class="slide-content">
+        <p class="eyebrow reveal">單元 B · 應用程式現代化</p>
+        <h2 class="slide-title tight reveal">舊有 Java 現代化為何停滯</h2>
+        <div class="card-grid stagger">
+            <div class="info-card flag-bad"><span class="card-index">01</span><span class="card-title">到處都是 Java 8</span><span class="card-body">核心服務仍停在主流支援已結束的語言版本。</span></div>
+            <div class="info-card flag-bad"><span class="card-index">02</span><span class="card-title">Spring Boot 2.x 已 EOL</span><span class="card-body">安全性修補停止，未處理的 CVE 持續累積。</span></div>
+            <div class="info-card flag-bad"><span class="card-index">03</span><span class="card-title">javax → jakarta 斷層</span><span class="card-body">Namespace 更名幾乎影響每一個 import。</span></div>
+            <div class="info-card flag-watch"><span class="card-index">04</span><span class="card-title">脆弱的回歸測試套件</span><span class="card-body">低覆蓋率讓每次升級都像在賭博。</span></div>
+            <div class="info-card flag-watch"><span class="card-index">05</span><span class="card-title">口耳相傳的知識</span><span class="card-body">知道「為什麼」的工程師早在兩次組織重整前離開。</span></div>
+            <div class="info-card flag-watch"><span class="card-index">06</span><span class="card-title">稽核軌跡要求</span><span class="card-body">法遵要求每項正式環境變更都要有證據。</span></div>
+        </div>
+    </div>
+    <div class="edge-accent track-b"></div>
+</section>
+
+<!-- ================================================================
+     SLIDE 22 — MODERNIZATION TYPES
+     SPEAKER NOTES: Emphasize these need different plans — a dependency
+     bump and a language upgrade should never share a checklist.
+     ================================================================ -->
+<section class="slide content-slide stack bg-off">
+    <div class="chrome">
+        <span class="track-tag track-b"><span class="track-dot"></span>單元 B · 應用程式現代化</span>
+        <span class="slide-index">22 / 32</span>
+    </div>
+    <div class="slide-content">
+        <p class="eyebrow reveal">單元 B · 應用程式現代化</p>
+        <h2 class="slide-title tight reveal">升級不只一種，每種都需要不同計畫</h2>
+        <div class="card-grid stagger">
+            <div class="info-card"><span class="card-index">01</span><span class="card-title">相依套件版本提升</span><span class="card-body">Patch／minor 版本，通常是機械式修改。</span></div>
+            <div class="info-card"><span class="card-index">02</span><span class="card-title">框架主版本升級</span><span class="card-body">Spring Boot 2 → 3，包含 breaking change 與設定重寫。</span></div>
+            <div class="info-card"><span class="card-index">03</span><span class="card-title">語言版本升級</span><span class="card-body">Java 8 → 21，包含新語法與已移除 API。</span></div>
+            <div class="info-card"><span class="card-index">04</span><span class="card-title">CVE 修補</span><span class="card-body">由安全風險驅動、限時且高優先。</span></div>
+            <div class="info-card"><span class="card-index">05</span><span class="card-title">Namespace 遷移</span><span class="card-body">在整個程式樹將 javax 改為 jakarta。</span></div>
+            <div class="info-card"><span class="card-index">06</span><span class="card-title">測試套件現代化</span><span class="card-body">先重建測試覆蓋率，再動其餘程式碼。</span></div>
+        </div>
+    </div>
+    <div class="edge-accent track-b"></div>
+</section>
+
+<!-- ================================================================
+     SLIDE 23 — ASSESS → PLAN → APPLY → VERIFY
+     SPEAKER NOTES: This loop is the spine of the whole afternoon —
+     refer back to it explicitly during the live demo checkpoints.
+     ================================================================ -->
+<section class="slide content-slide stack bg-dark grid-texture">
+    <div class="chrome">
+        <span class="track-tag track-b"><span class="track-dot"></span>單元 B · 應用程式現代化</span>
+        <span class="slide-index">23 / 32</span>
+    </div>
+    <div class="slide-content" style="position:relative; z-index:1;">
+        <p class="eyebrow reveal">單元 B · 應用程式現代化</p>
+        <h2 class="slide-title tight reveal">讓 AI 輔助升級安全可控的迴圈</h2>
+        <div class="flow-row reveal mt-lg">
+            <div class="flow-box"><span class="fb-title">評估</span><span class="fb-sub">相依套件、CVE、影響範圍</span></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box"><span class="fb-title">規劃</span><span class="fb-sub">順序、回復方案、負責人</span></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box"><span class="fb-title">套用</span><span class="fb-sub">由 Copilot 起草變更</span></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box"><span class="fb-title">驗證</span><span class="fb-sub">測試、審查、證據</span></div>
+        </div>
+        <div class="flow-loop reveal"><span class="loop-arc" aria-hidden="true"></span><span>反覆迭代，直到驗證亮綠燈</span></div>
+    </div>
+    <div class="edge-accent track-b"></div>
+</section>
+
+<!-- ================================================================
+     SLIDE 24 — ARTIFACTS
+     SPEAKER NOTES: Each artifact should map 1:1 to something a
+     compliance auditor could ask to see, six months later.
+     ================================================================ -->
+<section class="slide content-slide stack bg-white">
+    <div class="chrome">
+        <span class="track-tag track-b"><span class="track-dot"></span>單元 B · 應用程式現代化</span>
+        <span class="slide-index">24 / 32</span>
+    </div>
+    <div class="slide-content">
+        <p class="eyebrow reveal">單元 B · 應用程式現代化</p>
+        <h2 class="slide-title tight reveal">每個階段都留下可追溯紀錄</h2>
+        <div class="card-grid stagger">
+            <div class="info-card"><span class="card-index">評估</span><span class="card-title">評估報告</span><span class="card-body">相依風險清單、CVE 嚴重度、受影響模組。</span></div>
+            <div class="info-card"><span class="card-index">規劃</span><span class="card-title">升級計畫</span><span class="card-body">有順序的步驟、rollback 觸發條件、具名負責人。</span></div>
+            <div class="info-card"><span class="card-index">套用</span><span class="card-title">變更 diff／checkpoint</span><span class="card-body">逐檔呈現實際 diff，可審查、可還原。</span></div>
+            <div class="info-card"><span class="card-index">驗證</span><span class="card-title">驗證結果</span><span class="card-body">測試輸出、覆蓋率差異、前後比較。</span></div>
+            <div class="info-card"><span class="card-index">證據</span><span class="card-title">證據包</span><span class="card-body">Checkpoint diff 加測試結果，隨時可供稽核。</span></div>
+        </div>
+    </div>
+    <div class="edge-accent track-b"></div>
+</section>
+
+<!-- ================================================================
+     SLIDE 25 — COPILOT FIT VS. HUMAN DECISIONS
+     SPEAKER NOTES: The "public API contract" line is the one that
+     tends to trigger the most debate — let it breathe.
+     ================================================================ -->
+<section class="slide content-slide stack bg-off">
+    <div class="chrome">
+        <span class="track-tag track-b"><span class="track-dot"></span>單元 B · 應用程式現代化</span>
+        <span class="slide-index">25 / 32</span>
+    </div>
+    <div class="slide-content">
+        <p class="eyebrow reveal">單元 B · 應用程式現代化</p>
+        <h2 class="slide-title tight reveal">刻意分配工作</h2>
+        <div class="compare reveal">
+            <div class="compare-col neutral-blue">
+                <div class="compare-head" style="color: var(--accent-blue);">適合交給 Copilot</div>
+                <ul>
+                    <li>把 hard-coded 常數起草為 <code class="text-mono">@ConfigurationProperties</code> class</li>
+                    <li>將 <code class="text-mono">@Autowired</code> field 改為 constructor injection</li>
+                    <li>建立 typed DTO 與 Bean Validation annotation 骨架</li>
+                    <li>起草 <code class="text-mono">@RestControllerAdvice</code> 例外對應</li>
+                </ul>
+            </div>
+            <div class="compare-col neutral-dark">
+                <div class="compare-head" style="color: var(--accent-blue);">必須由人決策</div>
+                <ul>
+                    <li>變更商業規則前，先解讀其真正意義</li>
+                    <li>敏感模組的法遵／安全性核准</li>
+                    <li>任何 public API contract 變更</li>
+                    <li>何時上線，以及是否應該上線</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="edge-accent track-b"></div>
+</section>
+
+<!-- ================================================================
+     SLIDE 26 — GUARDRAILS
+     SPEAKER NOTES: These are non-negotiable, not suggestions — this
+     is the safety net that makes Copilot-assisted change acceptable.
+     ================================================================ -->
+<section class="slide content-slide stack bg-dark grid-texture">
+    <div class="chrome">
+        <span class="track-tag track-b"><span class="track-dot"></span>單元 B · 應用程式現代化</span>
+        <span class="slide-index">26 / 32</span>
+    </div>
+    <div class="slide-content" style="position:relative; z-index:1;">
+        <p class="eyebrow reveal">單元 B · 應用程式現代化</p>
+        <h2 class="slide-title tight reveal">讓 AI 輔助變更保持安全的防護措施</h2>
+        <div class="card-grid stagger">
+            <div class="info-card"><span class="card-index">01</span><span class="card-title">分支保護</span><span class="card-body">禁止直接 commit 到 main，必須提出 PR。</span></div>
+            <div class="info-card"><span class="card-index">02</span><span class="card-title">CI 必須綠燈</span><span class="card-body">測試通過後才可能 merge。</span></div>
+            <div class="info-card"><span class="card-index">03</span><span class="card-title">必要的人工審查</span><span class="card-body">每個 AI 產生的 diff 都要由第二人檢視。</span></div>
+            <div class="info-card"><span class="card-index">04</span><span class="card-title">法遵核准關卡</span><span class="card-body">受監管模組需要額外核准。</span></div>
+            <div class="info-card"><span class="card-index">05</span><span class="card-title">文件化 rollback</span><span class="card-body">每項變更都必須附帶回復方式。</span></div>
+            <div class="info-card"><span class="card-index">06</span><span class="card-title">變更稽核紀錄</span><span class="card-body">記錄 Copilot 建議與人工核准內容的差異。</span></div>
+        </div>
+    </div>
+    <div class="edge-accent track-b"></div>
+</section>
+
+<!-- ================================================================
+     SLIDE 27 — JAVA INSURANCE DEMO (INTRO)
+     SPEAKER NOTES: Run ./scripts/reset-baseline.sh && mvn test before
+     this slide so the room sees the baseline genuinely builds green.
+     ================================================================ -->
+<section class="slide content-slide bg-white">
+    <div class="chrome">
+        <span class="track-tag track-b"><span class="track-dot"></span>單元 B · 應用程式現代化</span>
+        <span class="slide-index">27 / 32</span>
+    </div>
+    <div class="slide-content">
+        <div>
+            <p class="eyebrow reveal">現場示範 · 單元 B</p>
+            <h2 class="slide-title reveal">現代化一個範圍明確的真實 Java 服務</h2>
+            <ul class="bullet-list reveal">
+                <li><span class="bullet-mark">01</span><span>Baseline：Java 17、Spring Boot 3.2.4 保單 REST API；<code class="text-mono">mvn test</code> 已綠燈，共 11 項測試。</span></li>
+                <li><span class="bullet-mark">02</span><span>五種仍可建置的舊式氣味：field injection、hard-coded 定價設定、Map 回應、手動驗證、薄弱錯誤處理。</span></li>
+                <li><span class="bullet-mark">03</span><span>範圍明確：現場只套用一項任務，不改 <code class="text-mono">pom.xml</code>，不新增 runtime。</span></li>
+                <li><span class="bullet-mark">04</span><span>每個 checkpoint 都會暫停確認，不會有任何無聲步驟。</span></li>
+            </ul>
+        </div>
+        <div class="side-visual reveal-scale">
+            <div class="code-window">
+                <div class="code-titlebar"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><span class="filename">PolicyService.java</span></div>
+                <pre><code><span class="bad-line">@Autowired</span>
+<span class="bad-line">private PolicyRepository policyRepository;</span>
+
+<span class="good-line">private final PolicyRepository policyRepository;</span>
+<span class="good-line">private final PricingProperties pricingProperties;</span>
+<span class="good-line">PolicyService(PolicyRepository repo,</span>
+<span class="good-line">              PricingProperties cfg) { ... }</span></code></pre>
+            </div>
+        </div>
+    </div>
+    <div class="edge-accent track-b"></div>
+</section>
+
+<!-- ================================================================
+     SLIDE 28 — CHECKPOINTED 35-MIN FLOW
+     SPEAKER NOTES: Timings mirror docs/app-modernization-demo.md
+     exactly (5 / 5 / 12 / 8 / 5). Announce each checkpoint out loud
+     so the "no silent steps" promise is kept.
+     ================================================================ -->
+<section class="slide content-slide stack bg-white">
+    <div class="chrome">
+        <span class="track-tag track-b"><span class="track-dot"></span>單元 B · 應用程式現代化</span>
+        <span class="slide-index">28 / 32</span>
+    </div>
+    <div class="slide-content">
+        <p class="eyebrow reveal">現場示範 · 單元 B</p>
+        <h2 class="slide-title tight reveal">35 分鐘、五個 checkpoint，全程透明</h2>
+        <div class="stepper stagger mt-lg">
+            <div class="step"><span class="step-dot">1</span><span class="step-label">評估</span><span class="step-time">0–5 分鐘</span></div>
+            <div class="step"><span class="step-dot">2</span><span class="step-label">規劃</span><span class="step-time">5–10 分鐘</span></div>
+            <div class="step"><span class="step-dot">3</span><span class="step-label">套用</span><span class="step-time">10–22 分鐘</span></div>
+            <div class="step"><span class="step-dot">4</span><span class="step-label">驗證</span><span class="step-time">22–30 分鐘</span></div>
+            <div class="step"><span class="step-dot">5</span><span class="step-label">審查與 rollback</span><span class="step-time">30–35 分鐘</span></div>
+        </div>
+        <p class="small-caption reveal mt-lg">外部化設定或 field → constructor injection → <code class="text-mono">mvn test</code> 綠燈（11/11）→ 審查 diff → 用 <code class="text-mono">reset-baseline.sh</code> 確認 rollback。</p>
+    </div>
+    <div class="edge-accent track-b"></div>
+</section>
+
+<!-- ================================================================
+     SLIDE 29 — VERIFY → FAILURE → LOOP
+     SPEAKER NOTES: If live Apply genuinely breaks something, read the
+     real compiler/test error first — don't guess. If time is short,
+     switch to the verified checkpoint rather than fixing on stage.
+     ================================================================ -->
+<section class="slide content-slide stack bg-dark grid-texture">
+    <div class="chrome">
+        <span class="track-tag track-b"><span class="track-dot"></span>單元 B · 應用程式現代化</span>
+        <span class="slide-index">29 / 32</span>
+    </div>
+    <div class="slide-content" style="position:relative; z-index:1;">
+        <p class="eyebrow reveal">現場示範 · 單元 B</p>
+        <h2 class="slide-title tight reveal">驗證是一個迴圈，並有演練過的備案</h2>
+        <div class="flow-row reveal mt-lg">
+            <div class="flow-box"><span class="fb-title">套用範圍明確的任務</span><span class="fb-sub">現場修改設定或 DI</span></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box"><span class="fb-title">mvn test</span><span class="fb-sub">11 項測試，檢查公式</span></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box"><span class="fb-title">若亮紅燈</span><span class="fb-sub">先閱讀真實錯誤</span></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box"><span class="fb-title">時間不足？</span><span class="fb-sub">切換到已驗證 checkpoint</span></div>
+        </div>
+        <div class="flow-loop reveal"><span class="loop-arc" aria-hidden="true"></span><span>不在台上進行無邊界修復；一支 script 即可切回 checkpoint</span></div>
+    </div>
+    <div class="edge-accent track-b"></div>
+</section>
+
+<!-- ================================================================
+     SLIDE 30 — CHECKPOINT EVIDENCE
+     SPEAKER NOTES: There is no PR or merge here — the tangible
+     evidence is the reviewed diff, a green mvn test, and open gates.
+     ================================================================ -->
+<section class="slide content-slide bg-white">
+    <div class="chrome">
+        <span class="track-tag track-b"><span class="track-dot"></span>單元 B · 應用程式現代化</span>
+        <span class="slide-index">30 / 32</span>
+    </div>
+    <div class="slide-content">
+        <div>
+            <p class="eyebrow reveal">現場示範 · 單元 B</p>
+            <h2 class="slide-title reveal">Diff 審查實際確認了什麼</h2>
+            <ul class="bullet-list reveal">
+                <li><span class="bullet-mark">✓</span><span>依照 <code class="text-mono">workshop/plan.md</code> 的六個步驟逐檔審查 diff。</span></li>
+                <li><span class="bullet-mark">✓</span><span><code class="text-mono">mvn test</code>：11/11 綠燈，保費公式與成功路徑 status code 均未改變。</span></li>
+                <li><span class="bullet-mark">✓</span><span>人工關卡仍待確認：定價真實來源、consumer 相容性、錯誤契約、policyType 採 enum 或設定。</span></li>
+            </ul>
+        </div>
+        <div class="side-visual reveal-scale">
+            <div class="mock-card">
+                <div class="mock-head"><span class="mock-title">Checkpoint diff · baseline → 現代化</span><span class="mock-pill pass">11 / 11</span></div>
+                <div class="mock-row"><span>PolicyService.java</span><span class="check">✔ 已審查</span></div>
+                <div class="mock-row"><span>PolicyController.java</span><span class="check">✔ 已審查</span></div>
+                <div class="mock-row"><span>GlobalExceptionHandler.java（新增）</span><span class="check">✔ 已審查</span></div>
+                <div class="mock-stat-row">
+                    <div class="mock-stat"><span class="n blue">12</span><span class="l">個變更檔案</span></div>
+                    <div class="mock-stat"><span class="n green">11/11</span><span class="l">項測試通過</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="edge-accent track-b"></div>
+</section>
+
+<!-- ================================================================
+     SLIDE 31 — APPMOD RECAP
+     SPEAKER NOTES: Read the closing line aloud — it's the thesis of
+     the whole workshop, not just Track B.
+     ================================================================ -->
+<section class="slide content-slide bg-white">
+    <div class="chrome">
+        <span class="track-tag track-b"><span class="track-dot"></span>單元 B · 應用程式現代化</span>
+        <span class="slide-index">31 / 32</span>
+    </div>
+    <div class="slide-content">
+        <div>
+            <p class="eyebrow reveal">單元 B · 重點回顧</p>
+            <h2 class="slide-title reveal">單元 B，五句話總結</h2>
+            <ul class="bullet-list reveal">
+                <li><span class="bullet-mark">01</span><span>動手前先評估。</span></li>
+                <li><span class="bullet-mark">02</span><span>讓 Copilot 起草機械式工作。</span></li>
+                <li><span class="bullet-mark">03</span><span>判斷與決策永遠由人負責。</span></li>
+                <li><span class="bullet-mark">04</span><span>防護措施不是阻力，而是讓速度保持安全的前提。</span></li>
+                <li><span class="bullet-mark">05</span><span>驗證 → 失敗 → 修正 → 再驗證，直到綠燈，再交付證據。</span></li>
+            </ul>
+            <p class="small-caption reveal mt-lg">這就是整場工作坊：有紀律的測試，有紀律的變更。</p>
+        </div>
+        <div class="side-visual reveal-scale">
+            <div class="visual-panel">
+                <p class="visual-panel-title">把這些原則帶回工作</p>
+                <div class="check-ring-list">
+                    <div class="check-item"><span class="check-num">✓</span><span class="check-text">評估，不假設</span></div>
+                    <div class="check-item"><span class="check-num">✓</span><span class="check-text">由人負責判斷</span></div>
+                    <div class="check-item"><span class="check-num">✓</span><span class="check-text">證據隨變更交付</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="edge-accent track-b"></div>
+</section>
+
+<!-- ================================================================
+     SLIDE 32 — FINAL Q&A / CLOSING
+     SPEAKER NOTES: Bookend to slide 1 — same split-hero shape, closing
+     energy. Leave both track pills on screen while questions run long.
+     ================================================================ -->
+<section class="slide bg-white">
+    <div class="chrome">
+        <span class="track-tag track-neutral"><span class="track-dot"></span>工作坊</span>
+        <span class="slide-index">32 / 32</span>
+    </div>
+    <div class="split-hero">
+        <div class="panel-top">
+            <div class="shield-shape" style="top: clamp(0.8rem,4vh,2.4rem); right: clamp(1rem,4vw,3rem);" aria-hidden="true"></div>
+            <p class="hero-eyebrow reveal">感謝大家今天下午的參與</p>
+            <h1 class="hero-title reveal">有問題嗎？<br>一起來<em>聊聊</em>。</h1>
+            <p class="hero-sub reveal">帶上最棘手的 locator、最難整理的舊有模組，或兩者一起來。</p>
+        </div>
+        <div class="panel-bottom">
+            <div class="closing-tracks reveal">
+                <span class="closing-pill a">單元 A · Playwright 自動化</span>
+                <span class="closing-pill b">單元 B · 應用程式現代化</span>
+            </div>
+        </div>
+    </div>
+    <div class="edge-accent neutral"></div>
+</section>
+
+</main>
+
+<script>
+/* =====================================================================
+   SLIDE PRESENTATION CONTROLLER
+   Handles: keyboard nav, touch/swipe, throttled wheel nav, progress bar,
+   nav dots, and IntersectionObserver-driven reveal animations.
+   No inline-editing functionality is included (per spec).
+   ===================================================================== */
+class SlidePresentation {
+    constructor() {
+        this.slides = Array.from(document.querySelectorAll('.slide'));
+        this.currentSlide = 0;
+        this.wheelLocked = false;
+        this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        this.setupNavDots();
+        this.setupIntersectionObserver();
+        this.setupKeyboardNav();
+        this.setupTouchNav();
+        this.setupWheelNav();
+        this.setupProgressBar();
+        this.updateActive(0);
+    }
+
+    goTo(index) {
+        if (index < 0 || index >= this.slides.length) return;
+        this.slides[index].scrollIntoView({ behavior: this.reducedMotion ? 'auto' : 'smooth', block: 'start' });
+    }
+
+    setupIntersectionObserver() {
+        // Adds .visible to trigger CSS reveal transitions, and tracks the
+        // most-visible slide to keep progress bar / nav dots in sync.
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+                    entry.target.classList.add('visible');
+                    const idx = this.slides.indexOf(entry.target);
+                    if (idx !== -1) this.updateActive(idx);
+                }
+            });
+        }, { threshold: [0, 0.5, 1] });
+        this.slides.forEach(slide => observer.observe(slide));
+    }
+
+    setupKeyboardNav() {
+        window.addEventListener('keydown', (e) => {
+            switch (e.key) {
+                case 'ArrowDown':
+                case 'ArrowRight':
+                case 'PageDown':
+                case ' ':
+                    e.preventDefault();
+                    this.goTo(this.currentSlide + 1);
+                    break;
+                case 'ArrowUp':
+                case 'ArrowLeft':
+                case 'PageUp':
+                    e.preventDefault();
+                    this.goTo(this.currentSlide - 1);
+                    break;
+                case 'Home':
+                    e.preventDefault();
+                    this.goTo(0);
+                    break;
+                case 'End':
+                    e.preventDefault();
+                    this.goTo(this.slides.length - 1);
+                    break;
+            }
+        });
+    }
+
+    setupTouchNav() {
+        let touchStartY = 0;
+        let touchEndY = 0;
+        const threshold = 50;
+        window.addEventListener('touchstart', (e) => {
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+        window.addEventListener('touchend', (e) => {
+            touchEndY = e.changedTouches[0].screenY;
+            const delta = touchStartY - touchEndY;
+            if (Math.abs(delta) > threshold) {
+                this.goTo(this.currentSlide + (delta > 0 ? 1 : -1));
+            }
+        }, { passive: true });
+    }
+
+    setupWheelNav() {
+        // Throttled so one wheel gesture = one slide transition.
+        window.addEventListener('wheel', (e) => {
+            if (this.wheelLocked) return;
+            if (Math.abs(e.deltaY) < 12) return;
+            this.wheelLocked = true;
+            this.goTo(this.currentSlide + (e.deltaY > 0 ? 1 : -1));
+            setTimeout(() => { this.wheelLocked = false; }, 700);
+        }, { passive: true });
+    }
+
+    setupProgressBar() {
+        this.progressBar = document.getElementById('progressBar');
+        const update = () => {
+            const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+            const pct = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+            this.progressBar.style.width = pct + '%';
+        };
+        window.addEventListener('scroll', update, { passive: true });
+        update();
+    }
+
+    setupNavDots() {
+        this.navContainer = document.getElementById('navDots');
+        this.slides.forEach((slide, i) => {
+            const dot = document.createElement('button');
+            dot.setAttribute('aria-label', '前往第 ' + (i + 1) + ' 張投影片');
+            dot.addEventListener('click', () => this.goTo(i));
+            this.navContainer.appendChild(dot);
+        });
+        this.dots = Array.from(this.navContainer.children);
+    }
+
+    updateActive(index) {
+        this.currentSlide = index;
+        if (this.dots) {
+            this.dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    new SlidePresentation();
+});
+</script>
+</body>
+</html>

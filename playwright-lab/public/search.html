@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TransGlobe Insurance — 保單查詢</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="brand" href="/index.html">
+        <span class="brand__mark">TG</span>
+        <span>TransGlobe Insurance</span>
+      </a>
+      <nav class="main-nav" aria-label="Primary">
+        <a href="/index.html">Home</a>
+        <a href="/search.html" aria-current="page">Search Policies</a>
+        <a href="/quote.html">Get a Quote</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <h1 class="section-title">Search Policies</h1>
+
+    <div class="panel">
+      <form class="toolbar" id="search-form" autocomplete="off">
+        <div class="field field--grow">
+          <label for="search-input">保單號碼或持有人姓名</label>
+          <input
+            type="text"
+            id="search-input"
+            name="q"
+            data-testid="search-input"
+            placeholder="例如 POL-100234 或 Alice Nakamura"
+          />
+        </div>
+        <div class="field">
+          <label for="product-filter">商品</label>
+          <select id="product-filter" name="product" data-testid="product-filter">
+            <option value="all">全部商品</option>
+            <option value="auto">Auto</option>
+            <option value="home">Home</option>
+            <option value="life">Life</option>
+            <option value="travel">Travel</option>
+            <option value="health">Health</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="status-filter">狀態</label>
+          <select id="status-filter" name="status" data-testid="status-filter">
+            <option value="all">全部狀態</option>
+            <option value="active">Active</option>
+            <option value="pending">Pending</option>
+            <option value="expired">Expired</option>
+          </select>
+        </div>
+      </form>
+
+      <div class="results-meta">
+        <span id="results-count" data-testid="results-count">載入保單中&hellip;</span>
+        <span class="loading-indicator" id="search-loading" data-testid="search-loading">
+          <span class="spinner" aria-hidden="true"></span> 搜尋中&hellip;
+        </span>
+      </div>
+
+      <table class="data-table" id="policy-table" data-testid="policy-table">
+        <thead>
+          <tr>
+            <th>保單號碼</th>
+            <th>持有人</th>
+            <th>商品</th>
+            <th>狀態</th>
+            <th>每月保費</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="policy-table-body" data-testid="policy-table-body"></tbody>
+      </table>
+
+      <div class="empty-state" id="empty-state" data-testid="empty-state" hidden>
+        沒有符合搜尋條件的保單。請嘗試不同的姓名、保單號碼或篩選條件。
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    &copy; 2026 TransGlobe Insurance。本網站為僅供教學用途的本機示範入口網站。
+  </footer>
+
+  <div class="modal-overlay" id="policy-modal-overlay" data-testid="policy-detail-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="policy-modal-title">
+      <div class="modal__header">
+        <h2 id="policy-modal-title">保單明細</h2>
+        <button type="button" class="modal__close" id="policy-modal-close" data-testid="policy-modal-close" aria-label="關閉">&times;</button>
+      </div>
+      <dl class="detail-grid" id="policy-modal-body" data-testid="policy-modal-body"></dl>
+    </div>
+  </div>
+
+  <script src="/js/search.js"></script>
+</body>
+</html>

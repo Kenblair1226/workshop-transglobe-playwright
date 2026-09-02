@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TransGlobe Insurance — 線上報價</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="brand" href="/index.html">
+        <span class="brand__mark">TG</span>
+        <span>TransGlobe Insurance</span>
+      </a>
+      <nav class="main-nav" aria-label="Primary">
+        <a href="/index.html">Home</a>
+        <a href="/search.html">Search Policies</a>
+        <a href="/quote.html" aria-current="page">Get a Quote</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <h1 class="section-title">Get a Quote</h1>
+
+    <div class="panel">
+      <div class="form-alert" id="form-alert" data-testid="form-alert" role="alert"></div>
+
+      <form id="quote-form" novalidate>
+        <div class="quote-form">
+          <div class="field">
+            <label for="full-name">姓名</label>
+            <input type="text" id="full-name" name="fullName" data-testid="full-name" />
+            <span class="field-error" id="full-name-error" data-testid="full-name-error"></span>
+          </div>
+          <div class="field">
+            <label for="email">電子郵件</label>
+            <input type="email" id="email" name="email" data-testid="email" />
+            <span class="field-error" id="email-error" data-testid="email-error"></span>
+          </div>
+          <div class="field">
+            <label for="dob">出生日期</label>
+            <input type="date" id="dob" name="dob" data-testid="dob" />
+            <span class="field-error" id="dob-error" data-testid="dob-error"></span>
+          </div>
+          <div class="field">
+            <label for="product">保障類型</label>
+            <select id="product" name="product" data-testid="product">
+              <option value="">請選擇商品&hellip;</option>
+              <option value="auto">Auto</option>
+              <option value="home">Home</option>
+              <option value="life">Life</option>
+              <option value="travel">Travel</option>
+              <option value="health">Health</option>
+            </select>
+            <span class="field-error" id="product-error" data-testid="product-error"></span>
+          </div>
+          <div class="field">
+            <label for="coverage-amount">保額（USD）</label>
+            <input type="number" id="coverage-amount" name="coverageAmount" min="1" step="1" data-testid="coverage-amount" />
+            <span class="field-error" id="coverage-amount-error" data-testid="coverage-amount-error"></span>
+          </div>
+          <div class="field">
+            <label for="start-date">保單生效日期</label>
+            <input type="date" id="start-date" name="startDate" data-testid="start-date" />
+            <span class="field-error" id="start-date-error" data-testid="start-date-error"></span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="get-quote-btn" data-testid="get-quote-btn">
+          計算報價
+        </button>
+      </form>
+    </div>
+
+    <div class="panel quote-result" id="quote-result" data-testid="quote-result">
+      <div class="quote-result__headline">
+        <span>預估每月保費：</span>
+        <span class="quote-result__amount" id="quote-monthly" data-testid="quote-monthly">$0.00</span>
+      </div>
+      <p>
+        報價編號 <strong id="quote-id" data-testid="quote-id">&mdash;</strong> &middot;
+        年繳保費（已套用 5% 折扣）：
+        <strong id="quote-annual" data-testid="quote-annual">$0.00</strong>
+      </p>
+      <ul class="quote-result__breakdown">
+        <li><span>每月基本費率</span> <strong id="quote-base-rate" data-testid="quote-base-rate">$0.00</strong></li>
+        <li><span>保額加成</span> <strong id="quote-coverage-loading" data-testid="quote-coverage-loading">$0.00</strong></li>
+        <li><span>年齡調整</span> <strong id="quote-age-surcharge" data-testid="quote-age-surcharge">0%</strong></li>
+      </ul>
+      <p style="margin-top: 16px; font-size: 0.8rem; color: var(--color-text-muted);">
+        此預估僅供參考，並在本機為示範用途產生；並非具約束力的保險報價。
+      </p>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    &copy; 2026 TransGlobe Insurance。本網站為僅供教學用途的本機示範入口網站。
+  </footer>
+
+  <script src="/js/quote.js"></script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+{
+  "name": "playwright-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TransGlobe Insurance Playwright workshop lab: a zero-framework Node HTTP demo portal plus TypeScript Playwright tests, workshop exercises, and Azure Playwright Workspaces integration.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server/server.js",
+    "test": "playwright test",
+    "test:smoke": "playwright test tests/smoke.spec.ts",
+    "test:core": "playwright test tests/core-flows.spec.ts",
+    "test:patterns": "playwright test tests/workshop-exercise.spec.ts",
+    "test:solution": "playwright test tests/solutions/solution.spec.ts",
+    "test:lab": "cross-env RUN_WORKSHOP_LAB=1 playwright test tests/workshop-lab.spec.ts",
+    "test:lab:repeat": "cross-env RUN_WORKSHOP_LAB=1 playwright test tests/workshop-lab.spec.ts --repeat-each=3 --workers=2 --retries=0",
+    "test:lab:solution": "cross-env RUN_WORKSHOP_LAB_SOLUTION=1 playwright test tests/solutions/workshop-lab-solution.spec.ts",
+    "test:failure-demo": "cross-env RUN_FAILURE_DEMO=1 playwright test tests/diagnostics/failure-demo.spec.ts",
+    "test:report": "playwright show-report",
+    "test:cloud": "playwright test --config=playwright.service.config.ts",
+    "typecheck": "tsc --noEmit",
+    "install:browsers": "playwright install --with-deps chromium"
+  },
+  "devDependencies": {
+    "@azure/identity": "4.12.0",
+    "@azure/playwright": "^1.1.6",
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^20.19.43",
+    "cross-env": "^10.1.0",
+    "dotenv": "^17.4.2",
+    "typescript": "^7.0.2"
+  }
+}
