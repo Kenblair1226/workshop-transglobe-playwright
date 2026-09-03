@@ -25,12 +25,12 @@ Mono); the deck still renders with fallback system fonts if offline.
 | Swipe (touch) | Next/previous |
 | Nav dots (right edge) | Jump to any slide |
 
-Progress bar (top) and the current slide index (`NN / 32`, top-right) always
+Progress bar (top) and the current slide index (`NN / 28`, top-right) always
 reflect position. No inline text editing is included in this build.
 
 ## Structure
 
-**32 slides**, split into an intro plus two independently-paced tracks. Content
+**28 slides**, split into an intro plus two independently-paced tracks. Content
 is reconciled with this repo's actual shipped material — `docs/agenda.md`,
 `docs/participant-lab.md`, `docs/app-modernization-demo.md`, and the real
 `playwright-lab/` and `app-modernization-demo/` code — not an idealized demo.
@@ -48,17 +48,14 @@ is reconciled with this repo's actual shipped material — `docs/agenda.md`,
   default 17 reliable cloud tests to 85 instances with at most 20 client
   workers. It assumes the audience already uses Playwright and avoids a
   framework API tour.
-- **Track B · App Modernization (slides 20–31)** — section divider,
+- **Track B · App Modernization (slides 20–26)** — section divider,
   modernization challenges, modernization types, the Assess → Plan → Apply →
-  Verify loop, artifacts, Copilot-fit vs. human-decision boundaries,
-  guardrails, and a Java insurance demo grounded in the real baseline (Java
-  17 / Spring Boot 3.2.4, five real smells: field injection, hard-coded
-  pricing config, Map responses, manual validation, weak error handling),
-  the checkpointed 35-minute flow (5 / 5 / 12 / 8 / 5 min: Assess, Plan,
-  Apply, Verify, Review & rollback), a verify loop with a rehearsed
-  checkpoint fallback, checkpoint evidence (diff review + 11/11 `mvn test` +
-  open human gates — no PR, no merge), and a Track B recap.
-- **Slide 32** — Closing / Q&A (shared, bookends slide 1).
+  Verify loop, artifacts, Copilot-fit vs. human-decision boundaries, and
+  guardrails.
+- **Slide 27** — Live-demo divider. The Java insurance demo (baseline,
+  checkpointed 35-minute flow, verify loop, checkpoint evidence, recap) is
+  presented live by the instructor from `docs/app-modernization-demo.md`.
+- **Slide 28** — Closing / Q&A (shared, bookends slide 1).
 
 Each track is visually distinguished by **state**, not a new color: Track A
 uses a filled dot + solid edge accent bar; Track B uses a hollow dot + dashed
@@ -88,7 +85,7 @@ animations use `IntersectionObserver` and respect `prefers-reduced-motion`.
 
 ## Validation performed
 
-- **Structure**: exactly 32 `<section class="slide ...">` blocks, balanced
+- **Structure**: exactly 28 `<section class="slide ...">` blocks, balanced
   HTML tags (verified with `HTMLParser`), no leftover template markers, no
   negated `clamp()/min()/max()`, no inline-editing code, `viewport-base.css`
   present verbatim, Google Fonts link present.

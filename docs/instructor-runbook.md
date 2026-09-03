@@ -69,7 +69,7 @@ xdg-open ../slides/workshop.html
 5. 執行期間對照 client workers / managed browsers，觀察 duration、client resource 與 target load。
 6. 直接開啟預先完成的 Azure Portal test run。
 
-Cloud config 使用明確 allowlist，只包含 17 個可靠 tests；`--repeat-each=5` 形成 85 個 test instances。`--workers=20` 是 client-side worker 上限，不代表固定實際併發或效能倍數。正式 Workshop 前應先量測 duration、client capacity、target load、quota 與 test-minute 用量。
+Cloud config 使用明確 allowlist，只包含 17 個可靠 tests；`--repeat-each=5` 形成 85 個 test instances。`--workers=20` 是本 demo 在 client 端設定的併發值，不是服務上限（官方建議 ≤ 50 parallel workers，每個 workspace quota 為 100，可申請提高），也不代表固定實際併發或效能倍數。正式 Workshop 前應先量測 duration、client capacity、target load、quota 與 test-minute 用量。
 
 **備案順序**：已完成 portal run → 錄影 → screenshots。不要在台上排查 MFA、quota 或 firewall。
 
